@@ -8,22 +8,65 @@ using Microsoft.Xna.Framework.Input;
 
 namespace NaGaDeMo
 {
-    public class Tile
+    public interface MonoGraphic
     {
-        public Rectangle bounds = new Rectangle(0, 0, 64, 64);
+        Rectangle Bounds { get; set; }
+        Texture2D Image { get; set; }
+
+        void Draw(SpriteBatch spriteBatch);
+
+    }
+
+    
+    /// <summary>
+    /// A Tile is a single element of a Map
+    /// </summary>
+    public class Tile: MonoGraphic
+    {
+        private Rectangle bounds = new Rectangle(0, 0, 64, 64);
+        public Rectangle Bounds
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private Texture2D image;
+        public Texture2D Image
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(background, this.bounds, Color.White);
+            spriteBatch.Draw(this.image, this.bounds, Color.White);
         }
 
     }
 
+    /// <summary>
+    /// A Map is a collection of tiles
+    /// </summary>
     public class Map
     {
-        public Tile[] tiles;
+        private int[][] mapArray;
+        private Tile[] tiles;
 
-        public Texture2D mapImage;
+        private Texture2D mapImage;
 
         public void renderMap()
         {

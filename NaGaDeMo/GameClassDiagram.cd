@@ -1,18 +1,26 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="NaGaDeMo.Character" Collapsed="true">
+  <Class Name="NaGaDeMo.Character">
     <Position X="0.5" Y="0.5" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAEAAAAAAAAAAAAAAAAAAQAAAAAAAAABAAAAAAAA=</HashCode>
       <FileName>Character.cs</FileName>
     </TypeIdentifier>
+    <Lollipop Position="0.2" />
   </Class>
   <Class Name="NaGaDeMo.Map">
-    <Position X="0.75" Y="1.5" Width="2.75" />
+    <Position X="3.5" Y="0.5" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAACAAAQAAAAAAAAAAAAgAAAAAAAAAAQAAAAAA=</HashCode>
       <FileName>Map.cs</FileName>
     </TypeIdentifier>
   </Class>
+  <Struct Name="NaGaDeMo.stat">
+    <Position X="1" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAABAAAAAAAACAAAAAgAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Character.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>
