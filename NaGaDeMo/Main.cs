@@ -12,6 +12,8 @@ namespace NaGaDeMo
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        public Texture2D terrain;
+
         public Main()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -39,6 +41,8 @@ namespace NaGaDeMo
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            terrain = Content.Load<Texture2D>("terrain.png");
 
             // TODO: use this.Content to load your game content here
         }
@@ -76,6 +80,12 @@ namespace NaGaDeMo
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
+
+            spriteBatch.Begin();
+
+            spriteBatch.Draw(terrain, new Rectangle(0, 0, 64, 64), new Rectangle(0, 0, 64, 64), Color.White);
+            
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }

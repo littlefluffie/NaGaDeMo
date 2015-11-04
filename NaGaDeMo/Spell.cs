@@ -10,6 +10,7 @@ namespace NaGaDeMo
         void Resolve(Targetable target);
     }
 
+  
     public class Spell : Castable
     {
         public void Resolve(Targetable target)

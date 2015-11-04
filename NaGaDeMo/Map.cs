@@ -63,16 +63,30 @@ namespace NaGaDeMo
     /// </summary>
     public class Map
     {
-        private int[][] mapArray;
+        private int[,] mapArray;
+
+
+        private Texture2D textureMap;
+
         private Tile[] tiles;
 
         private Texture2D mapImage;
 
-        public void renderMap()
+        public void GenerateTiles()
         {
-            foreach (Tile tile in this.tiles)
-            {
 
+        }
+
+        public int[,] MapArray
+        {
+            get
+            {
+                return mapArray;
+            }
+
+            set
+            {
+                mapArray = value;
             }
         }
     }
