@@ -43,7 +43,6 @@ namespace NaGaDeMo
     }
 
     public class Player : Character, Caster
-
     {
 
     }
@@ -87,6 +86,10 @@ namespace NaGaDeMo
                 if (value > max)
                 {
                     current = max;
+                }
+                else if (value < 0)
+                {
+                    current = 0;
                 }
                 else
                 {

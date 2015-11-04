@@ -10,7 +10,7 @@ namespace NaGaDeMo
     /// </summary>
     public class Engine
     {
-
+        
     }
 
     public class Battle

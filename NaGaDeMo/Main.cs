@@ -12,12 +12,19 @@ namespace NaGaDeMo
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        public Texture2D terrain;
+        public Map GameMap = Templates.Maps.DefaultMap();
+
 
         public Main()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+
+            graphics.PreferredBackBufferWidth = 640;  // set this value to the desired width of your window
+            graphics.PreferredBackBufferHeight = 640;   // set this value to the desired height of your window
+            graphics.ApplyChanges();
+
+            this.IsMouseVisible = true;
         }
 
         /// <summary>
@@ -42,7 +49,7 @@ namespace NaGaDeMo
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            terrain = Content.Load<Texture2D>("terrain.png");
+            GameMap.TextureMap = Content.Load<Texture2D>(GameMap.TextureName);
 
             // TODO: use this.Content to load your game content here
         }
@@ -83,8 +90,13 @@ namespace NaGaDeMo
 
             spriteBatch.Begin();
 
-            spriteBatch.Draw(terrain, new Rectangle(0, 0, 64, 64), new Rectangle(0, 0, 64, 64), Color.White);
-            
+            spriteBatch.Draw(GameMap.TextureMap, new Rectangle(0, 0, 64, 64), new Rectangle(0, 0, 64, 64), Color.White);
+
+            foreach (Tile tile in GameMap.Tiles)
+            {
+                tile.Draw(spriteBatch, GameMap.TextureMap);
+            }
+
             spriteBatch.End();
 
             base.Draw(gameTime);

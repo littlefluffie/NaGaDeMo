@@ -8,52 +8,41 @@ using Microsoft.Xna.Framework.Input;
 
 namespace NaGaDeMo
 {
-    public interface MonoGraphic
-    {
-        Rectangle Bounds { get; set; }
-        Texture2D Image { get; set; }
-
-        void Draw(SpriteBatch spriteBatch);
-
-    }
-
-    
     /// <summary>
     /// A Tile is a single element of a Map
     /// </summary>
-    public class Tile: MonoGraphic
+    public class Tile 
     {
+        private int mapIndex;
+        public int MapIndex
+        {
+            get
+            {
+                return mapIndex;
+            }
+            set
+            {
+                mapIndex = value;
+            }
+        }
+
         private Rectangle bounds = new Rectangle(0, 0, 64, 64);
         public Rectangle Bounds
         {
             get
             {
-                throw new NotImplementedException();
+                return bounds;
             }
 
             set
             {
-                throw new NotImplementedException();
+                bounds = value;
             }
         }
 
-        private Texture2D image;
-        public Texture2D Image
+        public void Draw(SpriteBatch spriteBatch, Texture2D textureMap)
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
-
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public void Draw(SpriteBatch spriteBatch)
-        {
-            spriteBatch.Draw(this.image, this.bounds, Color.White);
+            spriteBatch.Draw(textureMap, this.bounds, new Rectangle(mapIndex * 64, 0, 64, 64), Color.White);
         }
 
     }
@@ -63,32 +52,78 @@ namespace NaGaDeMo
     /// </summary>
     public class Map
     {
-        private int[,] mapArray;
-
-
-        private Texture2D textureMap;
-
-        private Tile[] tiles;
-
-        private Texture2D mapImage;
-
-        public void GenerateTiles()
-        {
-
-        }
-
-        public int[,] MapArray
+        private List<Tile> tiles = new List<Tile>();
+        public List<Tile> Tiles
         {
             get
             {
-                return mapArray;
+                return tiles;
+            }
+            set
+            {
+                tiles = value;
+            }
+        }
+
+        public void GenerateTiles()
+        {
+            tiles.Clear();
+            string[] lines = System.IO.File.ReadAllLines(@"../../../Maps/"+ mapFile);
+
+            for (var j = 0; j < lines.Length; j++)
+            {
+                for (var i = 0; i < lines[j].Length; i++)
+                {
+                    Tile tile = new Tile();
+                    tile.Bounds = new Rectangle(i * 64, j * 64, 64, 64);
+                    tile.MapIndex = int.Parse(lines[j].Substring(i, 1));
+                    tiles.Add(tile);
+                }
+            }
+        }
+
+        private string textureName;
+        public string TextureName
+        {
+            get
+            {
+                return textureName;
             }
 
             set
             {
-                mapArray = value;
+                textureName = value;
             }
         }
+
+        private Texture2D textureMap;
+        public Texture2D TextureMap
+        {
+            get
+            {
+                return textureMap;
+            }
+
+            set
+            {
+                textureMap = value;
+            }
+        }
+
+        private string mapFile;
+        public string MapFile
+        {
+            get
+            {
+                return mapFile;
+            }
+
+            set
+            {
+                mapFile = value;
+            }
+        }
+
     }
 }
 

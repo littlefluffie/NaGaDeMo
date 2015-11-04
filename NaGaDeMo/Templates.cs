@@ -5,15 +5,19 @@ using System.Text;
 
 namespace NaGaDeMo
 {
-    public class Templates
+    public static class Templates
     {
 
-        public class Maps
+        public static class Maps
         {
-            public Map DefaultMap()
+            public static Map DefaultMap()
             {
                 Map map = new Map();
-                map.MapArray = new int[10, 10] { { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }, { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, { 1, 0, 0, 0, 0, 0, 0, 0, 0, 1 }, { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 } };
+
+                map.TextureName = "terrain.png";
+                map.MapFile = "Default.txt";
+
+                map.GenerateTiles();
                 
                 return map;
             }
