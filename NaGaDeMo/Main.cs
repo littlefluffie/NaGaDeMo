@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Diagnostics;
 
 namespace NaGaDeMo
 {
@@ -11,7 +12,7 @@ namespace NaGaDeMo
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-
+        
         public Map GameMap = Templates.Maps.DefaultMap();
 
 
@@ -19,7 +20,7 @@ namespace NaGaDeMo
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-
+            
             graphics.PreferredBackBufferWidth = 640;  // set this value to the desired width of your window
             graphics.PreferredBackBufferHeight = 640;   // set this value to the desired height of your window
             graphics.ApplyChanges();
@@ -89,8 +90,6 @@ namespace NaGaDeMo
             // TODO: Add your drawing code here
 
             spriteBatch.Begin();
-
-            spriteBatch.Draw(GameMap.TextureMap, new Rectangle(0, 0, 64, 64), new Rectangle(0, 0, 64, 64), Color.White);
 
             foreach (Tile tile in GameMap.Tiles)
             {

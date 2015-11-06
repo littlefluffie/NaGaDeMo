@@ -8,6 +8,12 @@ using Microsoft.Xna.Framework.Input;
 
 namespace NaGaDeMo
 {
+    public enum TileType
+    {
+        Water,
+        Grass,
+        Rock
+    }
     /// <summary>
     /// A Tile is a single element of a Map
     /// </summary>

@@ -8,9 +8,27 @@ namespace NaGaDeMo
     /// <summary>
     /// The Game class handles the game actions and events
     /// </summary>
-    public class Engine
+    public static class Engine
     {
+        public enum GameState
+        {
+            GameStarted,
+            StartPlayerTurn,
+            WaitingForPlayer,
+            EndPlayerTurn,
+            StartEnemyTurn,
+            WaitingForEnemy,
+            EndEnemyTurn
+
+        }
+
         
+
+    }
+
+    public class Enemy
+    {
+
     }
 
     public class Battle
