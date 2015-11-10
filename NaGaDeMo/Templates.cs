@@ -24,5 +24,16 @@ namespace NaGaDeMo
 
         }
 
+        public static class Battles
+        {
+            public static Battle DefaultBattle()
+            {
+                Battle battle = new Battle();
+
+                return battle;
+            }
+
+        }
+
     }
 }
