@@ -12,15 +12,22 @@ namespace NaGaDeMo
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-        
-        
+
+
         public Main()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-            
-            graphics.PreferredBackBufferWidth = 640;  // set this value to the desired width of your window
-            graphics.PreferredBackBufferHeight = 640;   // set this value to the desired height of your window
+
+            //graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;  // set this value to the desired width of your window
+            //graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;   // set this value to the desired height of your window
+            //graphics.IsFullScreen = true;
+
+            graphics.PreferredBackBufferWidth = 1000;
+            graphics.PreferredBackBufferHeight = 1000;
+
+
+
             graphics.ApplyChanges();
 
             this.IsMouseVisible = true;
@@ -35,7 +42,7 @@ namespace NaGaDeMo
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            Engine.StartNewGame(Templates.Battles.DefaultBattle());
+            Engine.Initialize(this);
 
 
             base.Initialize();
@@ -51,6 +58,7 @@ namespace NaGaDeMo
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             Engine.LoadContent(Content);
+            UI.LoadContent(Content);
 
             // TODO: use this.Content to load your game content here
         }
@@ -76,6 +84,11 @@ namespace NaGaDeMo
 
             // TODO: Add your update logic here
 
+            foreach (Character character in Engine.Characters)
+            {
+                character.Update();
+            }
+
             base.Update(gameTime);
         }
 
@@ -85,16 +98,19 @@ namespace NaGaDeMo
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            Engine.BufferMap(GraphicsDevice, spriteBatch);
 
-            // TODO: Add your drawing code here
+            GraphicsDevice.Clear(Color.CornflowerBlue);
 
             spriteBatch.Begin();
 
+
+            //Draw the UI
+            UI.Draw(spriteBatch);
+
             // Render the game
-
             Engine.Draw(spriteBatch);
-
+            
             spriteBatch.End();
 
             base.Draw(gameTime);

@@ -12,6 +12,7 @@ namespace NaGaDeMo
             public static Creature Goblin(int X, int Y)
             {
                 Creature creature = new Creature();
+                creature.Name = "Goblin";
                 creature.TextureName = "Enemy";
                 creature.HP.Max = 10;
                 creature.Bounds.X = X * 64;

@@ -1,3 +1,6 @@
 NaGaDeMo/bin/Windows/Debug/
 NaGaDeMo/obj/x86/Debug/
 .vs/NaGaDeMo/v14/.suo
+NaGaDeMo/Content/bin/
+NaGaDeMo/Content/obj/Windows/.mgcontent
+NaGaDeMo/Content/obj/

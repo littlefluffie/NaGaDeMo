@@ -13,7 +13,7 @@ namespace NaGaDeMo
     public interface XNAObject
     {
         void Draw(SpriteBatch spritebatch);
-        void Update(GameTime gameTime);
+        //void Update(GameTime gameTime);
         void LoadContent(ContentManager Content);
     }
 
@@ -22,12 +22,41 @@ namespace NaGaDeMo
     /// </summary>
     public static class Engine
     {
+        // Event stuff
+        public static event EventHandler Start;
+
+        public delegate void EventHandler(object sender, EventArgs e);
+
+        public delegate void MouseEventHandler(object sender, MouseState mouseState);
+
+        public static List<Character> Characters = new List<Character>();
+
+        public static RenderTarget2D MapBuffer;
+
         public static Player Player = new Player();
 
         public static Battle CurrentBattle = new Battle();
 
         public static State GameState = State.GameStopped;
-        
+        private static EventArgs e = null;
+
+        public static void Initialize(Game game)
+        {
+            // Setup Buffer
+            MapBuffer = new RenderTarget2D(game.GraphicsDevice, 640, 640);
+            
+            // Subscribe to event handler
+            Start += new EventHandler(OnGameStart);
+            
+            Player.HP.Current = Player.HP.Max;
+            Player.TextureName = "Player";
+            CurrentBattle = Templates.Battles.DefaultBattle();
+            CurrentBattle.Player = Player;
+
+            GameStateChange(State.GameStarted);
+        }
+
+
         public enum State
         {
             GameStarted,
@@ -47,7 +76,8 @@ namespace NaGaDeMo
             switch (state)
             {
                 case State.GameStarted:
-                    StartGame();
+                    Start(null, e);
+                    
                     break;
                 case State.StartPlayerTurn:
                     StartPlayerTurn();
@@ -98,29 +128,30 @@ namespace NaGaDeMo
             GameStateChange(State.WaitingForPlayer);
         }
 
-        private static void StartGame()
-        {
-            Player.HP.Current = Player.HP.Max;
-            Player.TextureName = "Player";
-            CurrentBattle.Player = Player;
-
-            GameStateChange(State.StartPlayerTurn);
-
-        }
-
-        public static void StartNewGame(Battle battle = null)
-        {
-            Debug.WriteLine("Starting New Game");
-            CurrentBattle = battle;
-
-
-            // Start the game
-            GameStateChange(State.GameStarted);
-        }
-
         public static void Draw(SpriteBatch spriteBatch)
         {
+            spriteBatch.Draw(MapBuffer, UI.GameView, Color.White );
+        }
+
+        /// <summary>
+        /// Renders the complete Battle to the MapBuffer to be rendered to the screen later
+        /// </summary>
+        /// <param name="graphicsDevice"></param>
+        /// <param name="spriteBatch"></param>
+        public static void BufferMap(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
+        {
+            graphicsDevice.SetRenderTarget(Engine.MapBuffer);
+            graphicsDevice.Clear(Color.CornflowerBlue);
+
+            spriteBatch.Begin();
+
             CurrentBattle.Draw(spriteBatch);
+
+            spriteBatch.End();
+
+            graphicsDevice.SetRenderTarget(null);
+
+
         }
 
         public static void LoadContent(ContentManager Content)
@@ -133,7 +164,7 @@ namespace NaGaDeMo
             {
                 // Load player content
                 Player.LoadContent(Content);
-                
+
                 // Load Map content
                 CurrentBattle.GameMap.LoadContent(Content);
 
@@ -141,6 +172,22 @@ namespace NaGaDeMo
                 CurrentBattle.LoadContent(Content);
             }
         }
+
+        #region Events
+
+        public static void OnGameStart(object sender, EventArgs e)
+        {
+            Debug.WriteLine("Game has started");
+        }
+
+        public static void OnPlayerTurn()
+        {
+
+        }
+
+        
+
+        #endregion
     }
 
     public class Opponent
@@ -154,16 +201,16 @@ namespace NaGaDeMo
 
     public class Battle
     {
-        public Player Player = new Player();
-        
+        public Player Player;
+
         public int TurnNumber;
-        
+
         public Map GameMap = new Map();
-        
+
         public Opponent Opponent = new Opponent();
-        
+
         public List<Creature> Creatures = new List<Creature>();
-                  
+
         public void Draw(SpriteBatch spriteBatch)
         {
             // Draw the map
@@ -178,8 +225,6 @@ namespace NaGaDeMo
             //Draw the Player
             Player.Draw(spriteBatch);
 
-            //Draw the UI
-            UI.Draw(spriteBatch);
         }
 
         public void LoadContent(ContentManager content)

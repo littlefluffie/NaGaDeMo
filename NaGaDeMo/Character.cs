@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Diagnostics;
 
 namespace NaGaDeMo
 {
@@ -17,6 +18,9 @@ namespace NaGaDeMo
 
     public class Character : XNAObject
     {
+        
+        public string Name;
+
         public string TextureName;
         public Texture2D Texture;
 
@@ -26,7 +30,25 @@ namespace NaGaDeMo
 
         public stat HP;
         public stat MP;
-        
+
+        public delegate void MouseEventHandler(object sender, MouseState mouseState);
+
+        public event MouseEventHandler Click;
+
+        public Character()
+        {
+            Engine.Characters.Add(this);
+
+            Click += Character_Click;
+        }
+
+        private void Character_Click(object sender, MouseState mouseState)
+        {
+            
+            Debug.WriteLine("You clicked me!");
+            Debug.WriteLine("X, Y: " + mouseState.X + " " + mouseState.Y);
+        }
+
         public void Cast(Spell spell, List<XNAObject> targets)
         {
             if (this.MP.Current < spell.BaseManaCost)
@@ -41,6 +63,20 @@ namespace NaGaDeMo
 
         }
 
+        public void Update()
+        {
+            MouseState mouseState = Mouse.GetState();
+            Point mousePoint = new Point();
+            mousePoint.X = mouseState.X - UI.GameView.X;
+            mousePoint.Y = mouseState.Y - UI.GameView.Y;
+
+            UI.MouseCoordinates = mouseState.X + ", " + mouseState.Y;
+            if (Bounds.Contains(mousePoint) && mouseState.LeftButton == ButtonState.Pressed )
+            {
+                Click(this, mouseState);
+            }
+        }
+
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(Texture, Bounds, Color.White);
@@ -50,22 +86,36 @@ namespace NaGaDeMo
         {
             Texture = content.Load<Texture2D>(TextureName);
         }
+
+        public void OnGameStart(object sender, EventArgs e)
+        {
+            Debug.WriteLine("No ways, dude! I heard it too!" + Name);
+        }
+
+
     }
 
     public class Player : Character, Caster
     {
-        public string Name;
-
-        public stat XP;
         
-        public Texture2D PlayerTexture;
+        public stat XP;
+
+        public Player()
+        {
+            Engine.Start += OnGameStart;
+        }
 
 
     }
 
     public class Creature : Character, Caster
     {
-        
+        public Creature()
+        {
+            Engine.Start += OnGameStart;
+        }
+
+
     }
 
     public struct stat
