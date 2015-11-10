@@ -5,20 +5,34 @@ using System.Text;
 
 namespace NaGaDeMo
 {
-    public interface Castable
+    public enum TargetType
     {
-        void Resolve(Targetable target);
+        None,
+        Self,
+        Single,
+        Multiple
     }
 
-    public delegate void SpellDelegate(Character Caster = null, List<Targetable> Targets = null);
+    public interface Castable
+    {
+        void Resolve(Character Caster, List<XNAObject> Targets);
+    }
+
+    public delegate void SpellDelegate(Character Caster = null, List<XNAObject> Targets = null);
 
     public class Spell : Castable
     {
-        private SpellDelegate SpellName;
+        public TargetType TargetType { get; set; }
 
-        public void Resolve(Targetable target)
+        public int BaseManaCost { get; set; }
+        
+        public string SpellName { get; set; }
+
+        public SpellDelegate Method { get; set; }
+
+        public void Resolve(Character caster = null, List<XNAObject> targets = null)
         {
-            throw new NotImplementedException();
+            Method(caster, targets);
         }
     }
 }

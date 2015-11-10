@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -17,64 +18,29 @@ namespace NaGaDeMo
     /// <summary>
     /// A Tile is a single element of a Map
     /// </summary>
-    public class Tile 
+    public class Tile
     {
-        private int mapIndex;
-        public int MapIndex
-        {
-            get
-            {
-                return mapIndex;
-            }
-            set
-            {
-                mapIndex = value;
-            }
-        }
+        public int MapIndex;
 
-        private Rectangle bounds = new Rectangle(0, 0, 64, 64);
-        public Rectangle Bounds
-        {
-            get
-            {
-                return bounds;
-            }
-
-            set
-            {
-                bounds = value;
-            }
-        }
+        public Rectangle Bounds = new Rectangle(0, 0, 64, 64);
 
         public void Draw(SpriteBatch spriteBatch, Texture2D textureMap)
         {
-            spriteBatch.Draw(textureMap, this.bounds, new Rectangle(mapIndex * 64, 0, 64, 64), Color.White);
+            spriteBatch.Draw(textureMap, this.Bounds, new Rectangle(MapIndex * 64, 0, 64, 64), Color.White);
         }
-
     }
 
     /// <summary>
     /// A Map is a collection of tiles
     /// </summary>
-    public class Map
+    public class Map: XNAObject
     {
-        private List<Tile> tiles = new List<Tile>();
-        public List<Tile> Tiles
-        {
-            get
-            {
-                return tiles;
-            }
-            set
-            {
-                tiles = value;
-            }
-        }
+        private List<Tile> Tiles = new List<Tile>();
 
         public void GenerateTiles()
         {
-            tiles.Clear();
-            string[] lines = System.IO.File.ReadAllLines(@"../../../Maps/"+ mapFile);
+            Tiles.Clear();
+            string[] lines = System.IO.File.ReadAllLines(@"../../../Maps/" + MapFile);
 
             for (var j = 0; j < lines.Length; j++)
             {
@@ -83,53 +49,29 @@ namespace NaGaDeMo
                     Tile tile = new Tile();
                     tile.Bounds = new Rectangle(i * 64, j * 64, 64, 64);
                     tile.MapIndex = int.Parse(lines[j].Substring(i, 1));
-                    tiles.Add(tile);
+                    Tiles.Add(tile);
                 }
             }
         }
 
-        private string textureName;
-        public string TextureName
+        public void Draw(SpriteBatch spriteBatch)
         {
-            get
+            foreach (Tile tile in Tiles)
             {
-                return textureName;
-            }
-
-            set
-            {
-                textureName = value;
+                tile.Draw(spriteBatch, TextureMap);
             }
         }
 
-        private Texture2D textureMap;
-        public Texture2D TextureMap
+        public string TextureName;
+        
+        public Texture2D TextureMap;
+        
+        public string MapFile;
+
+        public void LoadContent(ContentManager content)
         {
-            get
-            {
-                return textureMap;
-            }
-
-            set
-            {
-                textureMap = value;
-            }
+            TextureMap = content.Load<Texture2D>(TextureName);
         }
-
-        private string mapFile;
-        public string MapFile
-        {
-            get
-            {
-                return mapFile;
-            }
-
-            set
-            {
-                mapFile = value;
-            }
-        }
-
     }
 }
 

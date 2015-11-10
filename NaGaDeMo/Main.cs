@@ -13,9 +13,7 @@ namespace NaGaDeMo
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         
-        public Map GameMap = Templates.Maps.DefaultMap();
-
-
+        
         public Main()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -37,7 +35,7 @@ namespace NaGaDeMo
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            Engine.StartNewGame();
+            Engine.StartNewGame(Templates.Battles.DefaultBattle());
 
 
             base.Initialize();
@@ -52,7 +50,7 @@ namespace NaGaDeMo
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            GameMap.TextureMap = Content.Load<Texture2D>(GameMap.TextureName);
+            Engine.LoadContent(Content);
 
             // TODO: use this.Content to load your game content here
         }
@@ -93,10 +91,9 @@ namespace NaGaDeMo
 
             spriteBatch.Begin();
 
-            foreach (Tile tile in GameMap.Tiles)
-            {
-                tile.Draw(spriteBatch, GameMap.TextureMap);
-            }
+            // Render the game
+
+            Engine.Draw(spriteBatch);
 
             spriteBatch.End();
 

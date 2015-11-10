@@ -3,53 +3,69 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace NaGaDeMo
 {
 
-    public interface Targetable
-    {
-
-    }
-
     public interface Caster
     {
-        void Cast(Spell spell, Targetable target);
+        void Cast(Spell spell, List<XNAObject> targets);
     }
 
-    public class Character : Targetable
+    public class Character : XNAObject
     {
-        private stat hp;
+        public string TextureName;
+        public Texture2D Texture;
 
-        public stat HP
+        public List<Spell> Spellbook = new List<Spell>();
+
+        public Rectangle Bounds = new Rectangle(0, 0, 64, 64);
+
+        public stat HP;
+        public stat MP;
+        
+        public void Cast(Spell spell, List<XNAObject> targets)
         {
-            get
+            if (this.MP.Current < spell.BaseManaCost)
             {
-                return hp;
+                throw new Exception("Not enough mana");
+            }
+            else
+            {
+                this.MP.Current -= spell.BaseManaCost;
+                spell.Resolve(this, targets);
             }
 
-            set
-            {
-                hp = value;
-            }
         }
 
-        public void Cast(Spell spell, Targetable target)
+        public void Draw(SpriteBatch spriteBatch)
         {
-            throw new NotImplementedException();
+            spriteBatch.Draw(Texture, Bounds, Color.White);
+        }
+
+        public void LoadContent(ContentManager content)
+        {
+            Texture = content.Load<Texture2D>(TextureName);
         }
     }
 
     public class Player : Character, Caster
     {
+        public string Name;
+
+        public stat XP;
+        
+        public Texture2D PlayerTexture;
+
 
     }
 
     public class Creature : Character, Caster
     {
-
+        
     }
 
     public struct stat
