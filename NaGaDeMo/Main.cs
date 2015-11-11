@@ -27,6 +27,13 @@ namespace NaGaDeMo
             //graphics.PreferredBackBufferHeight = 1000;
             graphics.PreferMultiSampling = true;
 
+           // UI.GameView.Height = (int)(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height * 0.8);
+           // UI.GameView.Width = UI.GameView.Height;
+
+
+            UI.GameView.X = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width/2 - UI.GameView.Width / 2;
+            UI.GameView.Y = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height/2 - UI.GameView.Height / 2;
+
 
             this.IsMouseVisible = true;
         }
