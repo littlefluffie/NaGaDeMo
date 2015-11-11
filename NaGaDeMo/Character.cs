@@ -42,12 +42,7 @@ namespace NaGaDeMo
             Click += Character_Click;
         }
 
-        private void Character_Click(object sender, MouseState mouseState)
-        {
-            
-            Debug.WriteLine("You clicked me!");
-            Debug.WriteLine("X, Y: " + mouseState.X + " " + mouseState.Y);
-        }
+
 
         public void Cast(Spell spell, List<XNAObject> targets)
         {
@@ -65,15 +60,9 @@ namespace NaGaDeMo
 
         public void Update()
         {
-            MouseState mouseState = Mouse.GetState();
-            Point mousePoint = new Point();
-            mousePoint.X = mouseState.X - UI.GameView.X;
-            mousePoint.Y = mouseState.Y - UI.GameView.Y;
-
-            UI.MouseCoordinates = mouseState.X + ", " + mouseState.Y;
-            if (Bounds.Contains(mousePoint) && mouseState.LeftButton == ButtonState.Pressed )
+            if (Bounds.Contains(UI.MousePoint) && UI.CurrentMouseState.LeftButton == ButtonState.Released && UI.PreviousMouseState.LeftButton == ButtonState.Pressed )
             {
-                Click(this, mouseState);
+                Click(this, UI.CurrentMouseState);
             }
         }
 
@@ -90,6 +79,13 @@ namespace NaGaDeMo
         public void OnGameStart(object sender, EventArgs e)
         {
             Debug.WriteLine("No ways, dude! I heard it too!" + Name);
+        }
+
+        private void Character_Click(object sender, MouseState mouseState)
+        {
+            UI.CharClick = !UI.CharClick;
+            Debug.WriteLine("You clicked me!");
+            Debug.WriteLine("X, Y: " + mouseState.X + " " + mouseState.Y);
         }
 
 

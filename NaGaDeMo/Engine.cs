@@ -50,6 +50,9 @@ namespace NaGaDeMo
             
             Player.HP.Current = Player.HP.Max;
             Player.TextureName = "Player";
+            Player.Bounds.X = 64;
+            Player.Bounds.Y = 64;
+
             CurrentBattle = Templates.Battles.DefaultBattle();
             CurrentBattle.Player = Player;
 

@@ -19,16 +19,14 @@ namespace NaGaDeMo
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            //graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;  // set this value to the desired width of your window
-            //graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;   // set this value to the desired height of your window
-            //graphics.IsFullScreen = true;
+            graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;  // set this value to the desired width of your window
+            graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;   // set this value to the desired height of your window
+            graphics.IsFullScreen = true;
 
-            graphics.PreferredBackBufferWidth = 1000;
-            graphics.PreferredBackBufferHeight = 1000;
+            //graphics.PreferredBackBufferWidth = 800;
+            //graphics.PreferredBackBufferHeight = 1000;
+            graphics.PreferMultiSampling = true;
 
-
-
-            graphics.ApplyChanges();
 
             this.IsMouseVisible = true;
         }
@@ -57,6 +55,11 @@ namespace NaGaDeMo
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            UI.pixel = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+            UI.pixel.SetData(new[] {
+                Color.White
+    }); // so that we can draw whatever color we want on top of it
+
             Engine.LoadContent(Content);
             UI.LoadContent(Content);
 
@@ -83,6 +86,7 @@ namespace NaGaDeMo
                 Exit();
 
             // TODO: Add your update logic here
+            UI.Update();
 
             foreach (Character character in Engine.Characters)
             {
@@ -110,7 +114,10 @@ namespace NaGaDeMo
 
             // Render the game
             Engine.Draw(spriteBatch);
-            
+
+            //Render any overlays
+            UI.Overlay.Draw(spriteBatch);
+
             spriteBatch.End();
 
             base.Draw(gameTime);
