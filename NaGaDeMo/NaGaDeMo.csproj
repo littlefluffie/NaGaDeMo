@@ -53,6 +53,7 @@
       <HintPath>$(MSBuildProgramFiles32)\MonoGame\v3.0\Assemblies\Windows\MonoGame.Framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
@@ -75,6 +76,7 @@
     <MonoGameContentReference Include="Content\Content.mgcb" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="Content\Centaur.spritefont" />
     <None Include="GameClassDiagram.cd" />
     <None Include="README.md" />

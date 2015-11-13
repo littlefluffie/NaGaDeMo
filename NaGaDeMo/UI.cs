@@ -16,7 +16,6 @@ namespace NaGaDeMo
             public static void Draw(SpriteBatch spriteBatch)
             {
                 spriteBatch.DrawString(UIFont, "X: " + MousePoint.X + " Y: " + MousePoint.Y + "Click: " + CurrentMouseState.LeftButton, new Vector2(10, 10), Color.Black);
-                
             }
         }
 
@@ -26,17 +25,17 @@ namespace NaGaDeMo
         public static MouseState CurrentMouseState;
         public static MouseState PreviousMouseState;
 
+        public static KeyboardState CurrentKeyboardState;
+        public static KeyboardState PreviousKeyboardState;
+
+        public static Point MapPoint = new Point(0, 0);
+
         public static Point MousePoint = new Point();
 
         public static Texture2D SpellBookTexture;
         public static SpriteFont UIFont;
 
         public static Rectangle GameView = new Rectangle(0, 0, 640, 640);
-
-        //Temp
-        public static bool CharClick;
-
-        //Temp
 
         public static void Draw(SpriteBatch spriteBatch)
         {
@@ -53,11 +52,17 @@ namespace NaGaDeMo
 
         public static void Update()
         {
+            // Mouse
             PreviousMouseState = CurrentMouseState;
             CurrentMouseState = Mouse.GetState();
 
             MousePoint.X = CurrentMouseState.X - GameView.X;
             MousePoint.Y = CurrentMouseState.Y - GameView.Y;
+
+            // Keyboard
+            PreviousKeyboardState = CurrentKeyboardState;
+            CurrentKeyboardState = Keyboard.GetState();
+
         }
     }
 

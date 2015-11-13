@@ -15,6 +15,8 @@ namespace NaGaDeMo
                 creature.Name = "Goblin";
                 creature.TextureName = "Enemy";
                 creature.HP.Max = 10;
+                creature.X = X;
+                creature.Y = Y;
                 creature.Bounds.X = X * 64;
                 creature.Bounds.Y = Y * 64;
                 return creature;

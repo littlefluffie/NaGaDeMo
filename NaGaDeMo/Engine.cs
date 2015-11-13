@@ -43,15 +43,15 @@ namespace NaGaDeMo
         public static void Initialize(Game game)
         {
             // Setup Buffer
-            MapBuffer = new RenderTarget2D(game.GraphicsDevice, 640, 640);
+            MapBuffer = new RenderTarget2D(game.GraphicsDevice, UI.GameView.Width, UI.GameView.Height);
             
             // Subscribe to event handler
             Start += new EventHandler(OnGameStart);
             
             Player.HP.Current = Player.HP.Max;
             Player.TextureName = "Player";
-            Player.Bounds.X = 64;
-            Player.Bounds.Y = 64;
+            Player.Bounds.X = 320;
+            Player.Bounds.Y = 128;
 
             CurrentBattle = Templates.Battles.DefaultBattle();
             CurrentBattle.Player = Player;
@@ -103,7 +103,6 @@ namespace NaGaDeMo
                 case State.GameStopped:
                     Environment.Exit(0);
                     break;
-
             }
         }
 
@@ -146,15 +145,13 @@ namespace NaGaDeMo
             graphicsDevice.SetRenderTarget(Engine.MapBuffer);
             graphicsDevice.Clear(Color.CornflowerBlue);
 
-            spriteBatch.Begin();
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation(UI.MapPoint.X, UI.MapPoint.Y, 0));
 
             CurrentBattle.Draw(spriteBatch);
 
             spriteBatch.End();
 
             graphicsDevice.SetRenderTarget(null);
-
-
         }
 
         public static void LoadContent(ContentManager Content)
@@ -188,8 +185,6 @@ namespace NaGaDeMo
 
         }
 
-        
-
         #endregion
     }
 
@@ -199,7 +194,6 @@ namespace NaGaDeMo
         {
 
         }
-
     }
 
     public class Battle
@@ -227,7 +221,6 @@ namespace NaGaDeMo
 
             //Draw the Player
             Player.Draw(spriteBatch);
-
         }
 
         public void LoadContent(ContentManager content)

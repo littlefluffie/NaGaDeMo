@@ -2,6 +2,8 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Diagnostics;
+using System.Configuration;
+using System.Collections.Specialized;
 
 namespace NaGaDeMo
 {
@@ -12,29 +14,25 @@ namespace NaGaDeMo
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-
+        
 
         public Main()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;  // set this value to the desired width of your window
-            graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;   // set this value to the desired height of your window
-            graphics.IsFullScreen = true;
+            //string screen_mode = ConfigurationManager.AppSettings.Get("screen_mode");
 
-            //graphics.PreferredBackBufferWidth = 800;
-            //graphics.PreferredBackBufferHeight = 1000;
+
+                    //graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;  // set this value to the desired width of your window
+                    //graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;   // set this value to the desired height of your window
+                    //graphics.IsFullScreen = true;
+
+                    //UI.GameView.X = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width / 2 - UI.GameView.Width / 2;
+                    //UI.GameView.Y = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height / 2 - UI.GameView.Height / 2;
+
+
             graphics.PreferMultiSampling = true;
-
-           // UI.GameView.Height = (int)(GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height * 0.8);
-           // UI.GameView.Width = UI.GameView.Height;
-
-
-            UI.GameView.X = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width/2 - UI.GameView.Width / 2;
-            UI.GameView.Y = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height/2 - UI.GameView.Height / 2;
-
-
             this.IsMouseVisible = true;
         }
 
