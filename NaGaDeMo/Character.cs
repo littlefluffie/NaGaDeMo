@@ -10,12 +10,8 @@ using System.Diagnostics;
 
 namespace NaGaDeMo
 {
-    public interface Caster
-    {
-        void Cast(Spell spell, List<XNAObject> targets);
-    }
 
-    public class Character : XNAObject
+    public class Character : XNAObject 
     {
         public string Name;
 
@@ -36,27 +32,24 @@ namespace NaGaDeMo
 
         public event MouseEventHandler Click;
 
+        public event EventHandler Death;
+
         public Character()
         {
             Engine.Characters.Add(this);
-
-            Click += Character_Click;
         }
 
-        public virtual void Cast(Spell spell, List<XNAObject> targets)
+
+        public void Damage(int damage)
         {
-            if (this.MP.Current < spell.BaseManaCost)
+            HP.Current -= damage;
+            if (HP.Current <= 0)
             {
-                throw new Exception("Not enough mana");
-            }
-            else
-            {
-                this.MP.Current -= spell.BaseManaCost;
-                spell.Resolve(this, targets);
+                Death(this, null);
             }
         }
 
-        public virtual void Update()
+        public virtual void Update(GameTime gametime)
         {
             if (Bounds.Contains(UI.MousePoint) && UI.CurrentMouseState.LeftButton == ButtonState.Released && UI.PreviousMouseState.LeftButton == ButtonState.Pressed )
             {
@@ -76,17 +69,13 @@ namespace NaGaDeMo
 
         public void OnGameStart(object sender, EventArgs e)
         {
-            Debug.WriteLine("No ways, dude! I heard it too!" + Name);
+            Debug.WriteLine("No ways, dude! I heard it too! " + Name);
         }
 
-        private void Character_Click(object sender, MouseState mouseState)
-        {
-            Debug.WriteLine("You clicked me!");
-            Debug.WriteLine("X, Y: " + mouseState.X + " " + mouseState.Y);
-        }
+      
     }
 
-    public class Player : Character, Caster
+    public class Player : Character
     {
         public stat XP;
 
@@ -96,15 +85,26 @@ namespace NaGaDeMo
 
         public Player()
         {
+            
             Engine.Start += OnGameStart;
 
             KeyPress += Player_KeyPress;
+            Click += Player_Click;
+
+            Init();
 
         }
 
-        public override void Update()
+        public void Init()
         {
-            base.Update();
+            HP.Current = HP.Max;
+            MP.Current = MP.Max;
+
+        }
+
+        public override void Update(GameTime gametime)
+        {
+            base.Update(gametime);
 
             if (UI.CurrentKeyboardState.GetPressedKeys().Length == 0 && UI.PreviousKeyboardState.GetPressedKeys().Length != 0)
             {
@@ -112,39 +112,159 @@ namespace NaGaDeMo
             }
         }
 
+        #region Events
+
+        private void Player_Click(object sender, MouseState mouseState)
+        {
+            Debug.WriteLine("You clicked yourself!");
+
+            if (Engine.CurrentCommandInput is CastSpellCommand)
+            {
+                CastSpellCommand castspell = (CastSpellCommand)Engine.CurrentCommandInput;
+                if (castspell.Spell.TargetType == TargetType.Self && castspell.CanExecute())
+                {
+                    castspell.Targets.Add(this);
+                    castspell.Execute();
+
+                    Engine.CommandList.Add(castspell);
+                    Engine.CommandQueue.Remove(castspell);
+                    Engine.CurrentCommandInput = null;
+                }
+            }
+        }
+
         public void Player_KeyPress(object sender, KeyboardState keyboardState)
         {
+            // Using key command for actions
+
+            // Move command
+            if (keyboardState.IsKeyDown(Keys.M))
+            {
+                MoveCommand move = new MoveCommand();
+                move.Player = this;
+
+                Engine.CommandQueue.Add(move);
+
+                Engine.CurrentCommandInput = move;
+            }
+
+            if (keyboardState.IsKeyDown(Keys.C))
+            {
+                CastSpellCommand castspell = new CastSpellCommand();
+                castspell.Caster = this;
+                castspell.Spell = Templates.Spells.Spark();
+
+                Engine.CommandQueue.Add(castspell);
+
+                Engine.CurrentCommandInput = castspell;
+            }
+
+            if (keyboardState.IsKeyDown(Keys.H))
+            {
+                CastSpellCommand castspell = new CastSpellCommand();
+                castspell.Caster = this;
+                castspell.Spell = Templates.Spells.Heal();
+
+                Engine.CommandQueue.Add(castspell);
+
+                Engine.CurrentCommandInput = castspell;
+            }
+
+
             if (keyboardState.IsKeyDown(Keys.S))
             {
-                Bounds.Y += 64;
-                UI.MapPoint.Y -= 64;
+                MoveCommand move = new MoveCommand();
+                move.Player = this;
+                move.MapPoint.X = Bounds.X;
+                move.MapPoint.Y = Bounds.Y + 64;
+                if (move.CanExecute())
+                {
+                    move.Execute();
+                }
             }
 
             if (keyboardState.IsKeyDown(Keys.W))
             {
-                Bounds.Y -= 64;
-                UI.MapPoint.Y += 64;
+                MoveCommand move = new MoveCommand();
+                move.Player = this;
+                move.MapPoint.X = Bounds.X;
+                move.MapPoint.Y = Bounds.Y - 64;
+                if (move.CanExecute())
+                {
+                    move.Execute();
+                }
             }
 
             if (keyboardState.IsKeyDown(Keys.A))
             {
-                Bounds.X -= 64;
-                UI.MapPoint.X += 64;
+                MoveCommand move = new MoveCommand();
+                move.Player = this;
+                move.MapPoint.X = Bounds.X - 64;
+                move.MapPoint.Y = Bounds.Y ;
+                if (move.CanExecute())
+                {
+                    move.Execute();
+                }
             }
 
             if (keyboardState.IsKeyDown(Keys.D))
             {
-                Bounds.X += 64;
-                UI.MapPoint.X -= 64;
+
+                MoveCommand move = new MoveCommand();
+                move.Player = this;
+                move.MapPoint.X = Bounds.X + 64;
+                move.MapPoint.Y = Bounds.Y ;
+                if (move.CanExecute())
+                {
+                    move.Execute();
+                }
             }
+
+
         }
+
+        #endregion
     }
 
-    public class Creature : Character, Caster
+    public class Creature : Character
     {
+        
         public Creature()
         {
             Engine.Start += OnGameStart;
+
+            Click += Creature_Click;
+            Death += Creature_Death;
+        }
+
+        private void Creature_Death(object sender, EventArgs e)
+        {
+            Debug.WriteLine("Alas! I die!");
+            Engine.CurrentBattle.Creatures.Remove(this);
+
+        }
+
+
+
+        private void Creature_Click(object sender, MouseState mouseState)
+        {
+            Debug.WriteLine("Megh! You clicked me!");
+            Debug.WriteLine("X, Y: " + mouseState.X + " " + mouseState.Y);
+
+            // Target of spell
+            if (Engine.CurrentCommandInput is CastSpellCommand)
+            {
+                CastSpellCommand castspell = (CastSpellCommand)Engine.CurrentCommandInput;
+                if (castspell.Spell.TargetType == TargetType.Single && castspell.CanExecute())
+                {
+                    castspell.Targets.Add(this);
+                    castspell.Execute();
+
+                    Engine.CommandList.Add(castspell);
+                    Engine.CommandQueue.Remove(castspell);
+                    Engine.CurrentCommandInput = null;
+                }
+            }
         }
     }
 

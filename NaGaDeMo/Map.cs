@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Diagnostics;
 
 namespace NaGaDeMo
 {
@@ -28,10 +29,57 @@ namespace NaGaDeMo
         public int X;
         public int Y;
 
+        public delegate void MouseEventHandler(object sender, MouseState mouseState);
+        
+        public event MouseEventHandler Click;
+
+        public Tile()
+        {
+            Click += Tile_Click;
+        }
+
+        public void Update()
+        {
+            if (Bounds.Contains(UI.MousePoint) && UI.CurrentMouseState.LeftButton == ButtonState.Released && UI.PreviousMouseState.LeftButton == ButtonState.Pressed)
+            {
+                Click(this, UI.CurrentMouseState);
+            }
+        }
+
         public void Draw(SpriteBatch spriteBatch, Texture2D textureMap)
         {
             spriteBatch.Draw(textureMap, this.Bounds, new Rectangle(MapIndex * 64, 0, 64, 64), Color.White);
         }
+
+        #region Events
+
+        public void Tile_Click(object sender, MouseState mouseState)
+        {
+            Debug.WriteLine("You have clicked on a Tile at " + X + ", " + Y);
+
+            if (Engine.CurrentCommandInput is MoveCommand)
+            {
+                MoveCommand move = (MoveCommand)Engine.CurrentCommandInput;
+                move.MapPoint.X = Bounds.X;
+                move.MapPoint.Y = Bounds.Y;
+
+                if (move.CanExecute())
+                {
+                    move.Execute();
+
+                    Engine.CommandList.Add(move);
+                    Engine.CommandQueue.Remove(move);
+                    Engine.CurrentCommandInput = null;
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+        }
+
+        #endregion
     }
 
     /// <summary>
@@ -39,7 +87,9 @@ namespace NaGaDeMo
     /// </summary>
     public class Map : XNAObject
     {
-        private List<Tile> Tiles = new List<Tile>();
+        public List<Tile> Tiles = new List<Tile>();
+
+        
 
         public int Width;
         public int Height;
@@ -79,6 +129,8 @@ namespace NaGaDeMo
             foreach (Tile tile in Tiles)
             {
                 tile.Draw(spriteBatch, TextureMap);
+
+                
             }
         }
 
@@ -91,6 +143,11 @@ namespace NaGaDeMo
         public void LoadContent(ContentManager content)
         {
             TextureMap = content.Load<Texture2D>(TextureName);
+        }
+
+        public void Update(GameTime gameTime)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -13,8 +13,77 @@ namespace NaGaDeMo
     public interface XNAObject
     {
         void Draw(SpriteBatch spritebatch);
-        //void Update(GameTime gameTime);
+
+        void Update(GameTime gameTime);
+
         void LoadContent(ContentManager Content);
+    }
+
+    public abstract class Command
+    {
+        public abstract void Execute();
+        public abstract bool CanExecute();
+
+    }
+
+    public class CastSpellCommand : Command
+    {
+        public Character Caster;
+        public Spell Spell;
+        public List<XNAObject> Targets = new List<XNAObject>();
+
+        public override bool CanExecute()
+        {
+            if (Caster.MP.Current < Spell.BaseManaCost)
+            {
+                Debug.WriteLine("Not enough Mana!");
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public override void Execute()
+        {
+            Caster.MP.Current -= Spell.BaseManaCost;
+            Spell.Resolve(Caster, Targets);
+        }
+
+    }
+
+    public class MoveCommand : Command
+    {
+        public Player Player;
+        public Point MapPoint;
+
+        public override void Execute()
+        {
+
+            Player.Bounds.X = MapPoint.X;
+            Player.Bounds.Y = MapPoint.Y;
+
+
+        }
+
+        public override bool CanExecute()
+        {
+
+
+            float distance = ((Player.Bounds.X - MapPoint.X) * (Player.Bounds.X - MapPoint.X) + (Player.Bounds.Y - MapPoint.Y) * (Player.Bounds.Y - MapPoint.Y));
+
+            if (distance < (64 * 3) * (64 * 3))
+            {
+                Debug.WriteLine("Within range " + distance);
+                return true;
+            }
+            else
+            {
+                Debug.WriteLine("Too far! " + distance);
+                return false;
+            }
+        }
     }
 
     /// <summary>
@@ -40,15 +109,25 @@ namespace NaGaDeMo
         public static State GameState = State.GameStopped;
         private static EventArgs e = null;
 
+        // Command stuff
+
+        public static Command CurrentCommandInput;
+
+        public static List<Command> CommandList = new List<Command>();
+
+        public static List<Command> CommandQueue = new List<Command>();
+
         public static void Initialize(Game game)
         {
             // Setup Buffer
             MapBuffer = new RenderTarget2D(game.GraphicsDevice, UI.GameView.Width, UI.GameView.Height);
-            
+
             // Subscribe to event handler
             Start += new EventHandler(OnGameStart);
-            
-            Player.HP.Current = Player.HP.Max;
+            Player.HP.Max = 10;
+            Player.MP.Max = 10;
+            Player.Init();
+
             Player.TextureName = "Player";
             Player.Bounds.X = 320;
             Player.Bounds.Y = 128;
@@ -80,7 +159,7 @@ namespace NaGaDeMo
             {
                 case State.GameStarted:
                     Start(null, e);
-                    
+
                     break;
                 case State.StartPlayerTurn:
                     StartPlayerTurn();
@@ -132,7 +211,7 @@ namespace NaGaDeMo
 
         public static void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(MapBuffer, UI.GameView, Color.White );
+            spriteBatch.Draw(MapBuffer, UI.GameView, Color.White);
         }
 
         /// <summary>
@@ -143,9 +222,10 @@ namespace NaGaDeMo
         public static void BufferMap(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
         {
             graphicsDevice.SetRenderTarget(Engine.MapBuffer);
-            graphicsDevice.Clear(Color.CornflowerBlue);
 
-            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation(UI.MapPoint.X, UI.MapPoint.Y, 0));
+            graphicsDevice.Clear(Color.White);
+
+            spriteBatch.Begin(SpriteSortMode.Deferred, null,  null, null, null, null, Matrix.CreateTranslation(UI.MapPoint.X, UI.MapPoint.Y, 0));
 
             CurrentBattle.Draw(spriteBatch);
 
@@ -198,6 +278,28 @@ namespace NaGaDeMo
 
     public class Battle
     {
+        public static class Overlay
+        {
+            public static void Draw(SpriteBatch spriteBatch)
+            {
+              
+                foreach (Creature creature in Engine.CurrentBattle.Creatures)
+                {
+                    spriteBatch.DrawString(UI.UIFont, "HP: " + creature.HP.Current, new Vector2(creature.Bounds.X, creature.Bounds.Y), Color.Red);
+
+                }
+
+                spriteBatch.DrawString(UI.UIFont, "MP: " + Engine.CurrentBattle.Player.MP.Current + "/" + Engine.CurrentBattle.Player.MP.Max, new Vector2(Engine.CurrentBattle.Player.Bounds.X, Engine.CurrentBattle.Player.Bounds.Y), Color.Blue, 0f, new Vector2(0, 0), 0.5f, SpriteEffects.None, 1.0f);
+
+                // Spell target
+                if (Engine.CurrentCommandInput is CastSpellCommand)
+                {
+                    spriteBatch.Draw(UI.pixel, new Rectangle((UI.MousePoint.X / 64) * 64, (UI.MousePoint.Y / 64) * 64, 64, 64), Color.Red * 0.5f);
+                }
+
+            }
+
+        }
         public Player Player;
 
         public int TurnNumber;
@@ -213,14 +315,17 @@ namespace NaGaDeMo
             // Draw the map
             GameMap.Draw(spriteBatch);
 
-            //Draw the creatures
+            // Draw the creatures
             foreach (Creature Creature in Creatures)
             {
                 Creature.Draw(spriteBatch);
             }
 
-            //Draw the Player
+            // Draw the Player
             Player.Draw(spriteBatch);
+
+            // Draw the overlay
+            Overlay.Draw(spriteBatch);
         }
 
         public void LoadContent(ContentManager content)

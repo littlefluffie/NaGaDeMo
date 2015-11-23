@@ -33,6 +33,7 @@ namespace NaGaDeMo
 
 
             graphics.PreferMultiSampling = true;
+            
             this.IsMouseVisible = true;
         }
 
@@ -47,6 +48,7 @@ namespace NaGaDeMo
             // TODO: Add your initialization logic here
             Engine.Initialize(this);
 
+            Templates.Interfaces.DefaultInterface.Init();
 
             base.Initialize();
         }
@@ -91,12 +93,19 @@ namespace NaGaDeMo
                 Exit();
 
             // TODO: Add your update logic here
-            UI.Update();
+            UI.Update(gameTime);
 
             foreach (Character character in Engine.Characters)
             {
-                character.Update();
+                character.Update(gameTime);
             }
+
+            foreach (Tile tile in Engine.CurrentBattle.GameMap.Tiles)
+            {
+                tile.Update();
+            }
+
+            UI.Overlay.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -115,7 +124,7 @@ namespace NaGaDeMo
 
 
             //Draw the UI
-            UI.Draw(spriteBatch);
+           UI.Draw(spriteBatch);
 
             // Render the game
             Engine.Draw(spriteBatch);
