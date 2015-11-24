@@ -57,8 +57,8 @@ namespace NaGaDeMo
 
         public bool InRange(Point origin, int range)
         {
-            Point point = new Point(Bounds.X + 32, Bounds.Y+ 32);
-            
+            Point point = new Point(Bounds.X + 32, Bounds.Y + 32);
+
             int radius = (range * 64 + 32) * (range * 64 + 32);
 
             int distance = ((point.X - origin.X) * (point.X - origin.X) + (point.Y - origin.Y) * (point.Y - origin.Y));
@@ -71,7 +71,7 @@ namespace NaGaDeMo
             {
                 return false;
             }
-        
+
         }
     }
 
@@ -141,7 +141,20 @@ namespace NaGaDeMo
     public static class Engine
     {
         // Event stuff
-        public static event EventHandler Start;
+
+        public static event EventHandler GameStart;
+
+        public static event EventHandler RoundStart;
+
+        public static event EventHandler PlayerTurnStart;
+        public static event EventHandler PlayerTurnEnd;
+
+        public static event EventHandler OpponentTurnStart;
+        public static event EventHandler OpponentTurnEnd;
+
+        public static event EventHandler RoundEnd;
+
+        public static event EventHandler GameEnd;
 
         private static EventArgs e = null;
 
@@ -213,40 +226,40 @@ namespace NaGaDeMo
             switch (state)
             {
                 case State.GameStarted:
-                    if (Start != null)
+                    if (GameStart != null)
                     {
-                        Start(null, e);
+                        GameStart(null, e);
                     }
                     break;
 
                 case State.StartPlayerTurn:
-                    StartPlayerTurn();
+                                        if (GameStart != null)
+                    {
+                        GameStart(null, e);
+                    }
                     break;
 
                 case State.WaitingForPlayer:
-
                     break;
-
                 case State.EndPlayerTurn:
-                    EndPlayerTurn();
                     break;
 
                 case State.StartEnemyTurn:
-                    StartEnemyTurn();
                     break;
 
                 case State.WaitingForEnemy:
-
                     break;
 
                 case State.EndEnemyTurn:
-                    EndEnemyTurn();
                     break;
 
                 case State.GameStopped:
-                    Environment.Exit(0);
+                    break;
+
+                default:
                     break;
             }
+
         }
 
         private static void EndEnemyTurn()
