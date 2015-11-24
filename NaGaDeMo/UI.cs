@@ -14,28 +14,16 @@ namespace NaGaDeMo
     /// </summary>
     public abstract class UIElement : XNAObject
     {
-        public Rectangle Bounds = new Rectangle(0, 0, 64, 64);
+        public UIElement()
+        {
+            Click += UIElement_Click;
+        }
 
-        public event Engine.MouseEventHandler Click;
-
-        public virtual void Draw(SpriteBatch spritebatch)
+        private void UIElement_Click(object sender, MouseState mouseState)
         {
 
         }
 
-        public virtual void Update(GameTime gameTime)
-        {
-            if (Bounds.Contains(UI.CurrentMouseState.Position) && UI.CurrentMouseState.LeftButton == ButtonState.Released && UI.PreviousMouseState.LeftButton == ButtonState.Pressed)
-            {
-                Click(this, UI.CurrentMouseState);
-            }
-
-        }
-
-        public virtual void LoadContent(ContentManager Content)
-        {
-
-        }
     }
 
     /// <summary>
@@ -47,7 +35,7 @@ namespace NaGaDeMo
         {
             public static void Draw(SpriteBatch spriteBatch)
             {
-                spriteBatch.DrawString(UI.UIFont, "X: " + UI.MousePoint.X + " Y: " + UI.MousePoint.Y + "Click: " + UI.CurrentMouseState.LeftButton, new Vector2(10, 10), Color.Black);
+                spriteBatch.DrawString(UI.UIFont, "Blah", new Vector2(10, 10), Color.Black);
 
                 foreach (UIElement Element in Elements)
                 {
@@ -64,8 +52,9 @@ namespace NaGaDeMo
             }
         }
 
-        // At the top of your class:
         public static Texture2D pixel;
+
+        public static Texture2D CircleOverlay;
 
         public static MouseState CurrentMouseState;
         public static MouseState PreviousMouseState;
@@ -95,6 +84,8 @@ namespace NaGaDeMo
             // Somewhere in your LoadContent() method:
             SpellBookTexture = Content.Load<Texture2D>("Spellbook");
             UIFont = Content.Load<SpriteFont>("Centaur");
+
+            CircleOverlay = Content.Load<Texture2D>("Circle");
         }
 
         public static void Update(GameTime gameTime)

@@ -11,16 +11,11 @@ using System.Diagnostics;
 namespace NaGaDeMo
 {
 
-    public class Character : XNAObject 
+    public abstract class Character : XNAObject 
     {
         public string Name;
 
-        public string TextureName;
-        public Texture2D Texture;
-
         public List<Spell> Spellbook = new List<Spell>();
-
-        public Rectangle Bounds = new Rectangle(0, 0, 64, 64);
 
         public int X;
         public int Y;
@@ -30,8 +25,6 @@ namespace NaGaDeMo
 
         public delegate void MouseEventHandler(object sender, MouseState mouseState);
 
-        public event MouseEventHandler Click;
-
         public event EventHandler Death;
 
         public Character()
@@ -39,46 +32,25 @@ namespace NaGaDeMo
             Engine.Characters.Add(this);
         }
 
+        public virtual void Initialize()
+        {
+            HP.Current = HP.Max;
+            MP.Current = MP.Max;
+        }
 
         public void Damage(int damage)
         {
             HP.Current -= damage;
-            if (HP.Current <= 0)
+            if (HP.Current <= 0 && Death != null)
             {
                 Death(this, null);
             }
         }
-
-        public virtual void Update(GameTime gametime)
-        {
-            if (Bounds.Contains(UI.MousePoint) && UI.CurrentMouseState.LeftButton == ButtonState.Released && UI.PreviousMouseState.LeftButton == ButtonState.Pressed )
-            {
-                Click(this, UI.CurrentMouseState);
-            }
-        }
-
-        public virtual void Draw(SpriteBatch spriteBatch)
-        {
-            spriteBatch.Draw(Texture, Bounds, Color.White);
-        }
-
-        public virtual void LoadContent(ContentManager content)
-        {
-            Texture = content.Load<Texture2D>(TextureName);
-        }
-
-        public void OnGameStart(object sender, EventArgs e)
-        {
-            Debug.WriteLine("No ways, dude! I heard it too! " + Name);
-        }
-
-      
     }
 
     public class Player : Character
     {
         public stat XP;
-
         public stat AP;
 
         public delegate void KeyboardEventHandler(object sender, KeyboardState keyboardState);
@@ -87,23 +59,16 @@ namespace NaGaDeMo
 
         public Player()
         {
-            
-            Engine.Start += OnGameStart;
-
-            
+           
             KeyPress += Player_KeyPress;
             Click += Player_Click;
-
-            Init();
-
         }
 
-        public void Init()
+        public override void Initialize()
         {
-            HP.Current = HP.Max;
-            MP.Current = MP.Max;
-            AP.Current = AP.Max;
+            base.Initialize();
 
+            AP.Current = AP.Max;
         }
 
         public override void Update(GameTime gametime)
@@ -174,6 +139,16 @@ namespace NaGaDeMo
                 Engine.CurrentCommandInput = castspell;
             }
 
+            if (keyboardState.IsKeyDown(Keys.F))
+            {
+                CastSpellCommand castspell = new CastSpellCommand();
+                castspell.Caster = this;
+                castspell.Spell = Templates.Spells.Fireball();
+
+                Engine.CommandQueue.Add(castspell);
+
+                Engine.CurrentCommandInput = castspell;
+            }
 
             if (keyboardState.IsKeyDown(Keys.S))
             {
@@ -223,8 +198,6 @@ namespace NaGaDeMo
                     move.Execute();
                 }
             }
-
-
         }
 
         #endregion
@@ -235,8 +208,6 @@ namespace NaGaDeMo
         
         public Creature()
         {
-            Engine.Start += OnGameStart;
-
             Click += Creature_Click;
             Death += Creature_Death;
         }
@@ -245,10 +216,7 @@ namespace NaGaDeMo
         {
             Debug.WriteLine("Alas! I die!");
             Engine.CurrentBattle.Creatures.Remove(this);
-
         }
-
-
 
         private void Creature_Click(object sender, MouseState mouseState)
         {

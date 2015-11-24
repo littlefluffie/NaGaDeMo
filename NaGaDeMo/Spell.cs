@@ -20,13 +20,21 @@ namespace NaGaDeMo
 
     public delegate void SpellDelegate(Character Caster = null, List<XNAObject> Targets = null);
 
+    // Maybe for Spells? Actions? Dunno 
+    public abstract class Action
+    {
+
+    }
+
     public class Spell : Castable
     {
         public TargetType TargetType { get; set; }
 
         public int BaseManaCost { get; set; }
-        
+
         public string SpellName { get; set; }
+
+        public int  Range { get; set; }
 
         public SpellDelegate Method { get; set; }
 

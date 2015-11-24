@@ -107,7 +107,7 @@ namespace NaGaDeMo
 
             foreach (Tile tile in Engine.CurrentBattle.GameMap.Tiles)
             {
-                tile.Update();
+                tile.Update(gameTime);
             }
 
             UI.Overlay.Update(gameTime);

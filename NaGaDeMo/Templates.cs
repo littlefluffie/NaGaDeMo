@@ -12,7 +12,6 @@ namespace NaGaDeMo
     {
         public static class Interfaces
         {
-
             public static class DefaultInterface
             {
                 public static void Init()
@@ -47,8 +46,6 @@ namespace NaGaDeMo
                     Debug.WriteLine("Ending turn...");
                 }
             }
-
-
         }
 
         public static class Creatures
@@ -81,6 +78,18 @@ namespace NaGaDeMo
                 return spell;
             }
 
+            public static Spell Fireball()
+            {
+                Spell spell = new Spell();
+                spell.TargetType = TargetType.Multiple;
+                spell.SpellName = "Fireball";
+                spell.Method = Methods.Fireball;
+                spell.Range = 1;
+                spell.BaseManaCost = 6;
+
+                return spell;
+            }
+
             public static Spell Heal()
             {
                 Spell spell = new Spell();
@@ -90,7 +99,6 @@ namespace NaGaDeMo
                 spell.BaseManaCost = 3;
 
                 return spell;
-
             }
         }
 
@@ -98,9 +106,9 @@ namespace NaGaDeMo
         {
             public static void Fireball(Character Caster = null, List<XNAObject> Targets = null)
             {
-                foreach (Creature Creature in Targets)
+                foreach (Character Character in Targets)
                 {
-                    Creature.Damage(10);
+                    Character.Damage(10);
                 }
             }
 
@@ -132,7 +140,6 @@ namespace NaGaDeMo
 
                 return map;
             }
-
         }
 
         public static class Battles
@@ -144,6 +151,8 @@ namespace NaGaDeMo
                 battle.GameMap = Maps.DefaultMap();
 
                 battle.Creatures.Add(Creatures.Goblin(3, 4));
+                battle.Creatures.Add(Creatures.Goblin(4, 5));
+                battle.Creatures.Add(Creatures.Goblin(5, 4));
 
                 battle.Creatures.Add(Creatures.Goblin(5, 7));
 

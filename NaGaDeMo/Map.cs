@@ -20,33 +20,19 @@ namespace NaGaDeMo
     /// <summary>
     /// A Tile is a single element of a Map
     /// </summary>
-    public class Tile
+    public class Tile : XNAObject
     {
         public int MapIndex;
 
-        public Rectangle Bounds = new Rectangle(0, 0, 64, 64);
-
         public int X;
         public int Y;
-
-        public delegate void MouseEventHandler(object sender, MouseState mouseState);
-        
-        public event MouseEventHandler Click;
 
         public Tile()
         {
             Click += Tile_Click;
         }
 
-        public void Update()
-        {
-            if (Bounds.Contains(UI.MousePoint) && UI.CurrentMouseState.LeftButton == ButtonState.Released && UI.PreviousMouseState.LeftButton == ButtonState.Pressed)
-            {
-                Click(this, UI.CurrentMouseState);
-            }
-        }
-
-        public void Draw(SpriteBatch spriteBatch, Texture2D textureMap)
+        public override void Draw(SpriteBatch spriteBatch, Texture2D textureMap)
         {
             spriteBatch.Draw(textureMap, this.Bounds, new Rectangle(MapIndex * 64, 0, 64, 64), Color.White);
         }
@@ -77,6 +63,49 @@ namespace NaGaDeMo
                 }
             }
 
+            if (Engine.CurrentCommandInput is CastSpellCommand)
+            {
+                CastSpellCommand spell = (CastSpellCommand)Engine.CurrentCommandInput;
+
+                switch (spell.Spell.TargetType)
+                {
+                    case TargetType.None:
+                        break;
+
+                    case TargetType.Self:
+                        break;
+
+                    case TargetType.Single:
+                        break;
+
+                    case TargetType.Multiple:
+                        if (!spell.CanExecute())
+                        {
+                            return;
+                        }
+
+                        foreach (Character character in Engine.Characters)
+                        {
+                            if(character.InRange(new Point (Bounds.X+32,Bounds.Y+32), spell.Spell.Range))
+                            {
+                                spell.Targets.Add(character);
+                            }
+                        }
+
+                        spell.Execute();
+                        Engine.CommandList.Add(spell);
+                        Engine.CommandQueue.Remove(spell);
+                        Engine.CurrentCommandInput = null;
+
+                        break;
+
+                    default:
+                        break;
+                }
+                
+
+            }
+
         }
 
         #endregion
@@ -88,9 +117,7 @@ namespace NaGaDeMo
     public class Map : XNAObject
     {
         public List<Tile> Tiles = new List<Tile>();
-
         
-
         public int Width;
         public int Height;
 
@@ -124,31 +151,23 @@ namespace NaGaDeMo
             }
         }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public override void Draw(SpriteBatch spriteBatch)
         {
             foreach (Tile tile in Tiles)
             {
                 tile.Draw(spriteBatch, TextureMap);
-
-                
             }
         }
 
-        public string TextureName;
+        public override void LoadContent(ContentManager content)
+        {
+            TextureMap = content.Load<Texture2D>("terrain");
+        }
 
         public Texture2D TextureMap;
 
         public string MapFile;
 
-        public void LoadContent(ContentManager content)
-        {
-            TextureMap = content.Load<Texture2D>(TextureName);
-        }
-
-        public void Update(GameTime gameTime)
-        {
-            throw new NotImplementedException();
-        }
-    }
+     }
 }
 

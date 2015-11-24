@@ -10,20 +10,75 @@ using Microsoft.Xna.Framework.Content;
 
 namespace NaGaDeMo
 {
-    public interface XNAObject
+    public abstract class XNAObject
     {
-        void Draw(SpriteBatch spritebatch);
+        public Rectangle Bounds = new Rectangle(0, 0, 64, 64);
 
-        void Update(GameTime gameTime);
+        public Texture2D Texture;
 
-        void LoadContent(ContentManager Content);
+        public string TextureName;
+
+        public event Engine.MouseEventHandler Click;
+        public event Engine.MouseEventHandler MouseOver;
+
+        public virtual void Update(GameTime gametime)
+        {
+            if (Bounds.Contains(UI.MousePoint))
+            {
+                if (MouseOver != null)
+                {
+                    MouseOver(this, UI.CurrentMouseState);
+                }
+            }
+
+            if (Bounds.Contains(UI.MousePoint) && UI.CurrentMouseState.LeftButton == ButtonState.Released && UI.PreviousMouseState.LeftButton == ButtonState.Pressed)
+            {
+                if (Click != null)
+                {
+                    Click(this, UI.CurrentMouseState);
+                }
+            }
+        }
+
+        public virtual void Draw(SpriteBatch spriteBatch)
+        {
+            spriteBatch.Draw(Texture, Bounds, Color.White);
+        }
+
+        public virtual void Draw(SpriteBatch spriteBatch, Texture2D textureMap)
+        {
+
+        }
+
+        public virtual void LoadContent(ContentManager content)
+        {
+            Texture = content.Load<Texture2D>(TextureName);
+        }
+
+        public bool InRange(Point origin, int range)
+        {
+            Point point = new Point(Bounds.X + 32, Bounds.Y+ 32);
+            
+            int radius = (range * 64 + 32) * (range * 64 + 32);
+
+            int distance = ((point.X - origin.X) * (point.X - origin.X) + (point.Y - origin.Y) * (point.Y - origin.Y));
+
+            if (distance < radius)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        
+        }
     }
 
     public abstract class Command
     {
         public abstract void Execute();
         public abstract bool CanExecute();
-
     }
 
     public class CastSpellCommand : Command
@@ -50,7 +105,6 @@ namespace NaGaDeMo
             Caster.MP.Current -= Spell.BaseManaCost;
             Spell.Resolve(Caster, Targets);
         }
-
     }
 
     public class MoveCommand : Command
@@ -60,17 +114,12 @@ namespace NaGaDeMo
 
         public override void Execute()
         {
-
             Player.Bounds.X = MapPoint.X;
             Player.Bounds.Y = MapPoint.Y;
-
-
         }
 
         public override bool CanExecute()
         {
-
-
             float distance = ((Player.Bounds.X - MapPoint.X) * (Player.Bounds.X - MapPoint.X) + (Player.Bounds.Y - MapPoint.Y) * (Player.Bounds.Y - MapPoint.Y));
 
             if (distance < (64 * 3) * (64 * 3))
@@ -94,20 +143,28 @@ namespace NaGaDeMo
         // Event stuff
         public static event EventHandler Start;
 
+        private static EventArgs e = null;
+
         public delegate void EventHandler(object sender, EventArgs e);
 
         public delegate void MouseEventHandler(object sender, MouseState mouseState);
 
+        // Characters in Game
+        // Check if necessary
         public static List<Character> Characters = new List<Character>();
 
+        // Map buffer
+        // Check if necessary
         public static RenderTarget2D MapBuffer;
 
+        // The Player
         public static Player Player = new Player();
 
+        // The Current Battle
         public static Battle CurrentBattle = new Battle();
 
+        // Game state
         public static State GameState = State.GameStopped;
-        private static EventArgs e = null;
 
         // Command stuff
 
@@ -122,12 +179,10 @@ namespace NaGaDeMo
             // Setup Buffer
             MapBuffer = new RenderTarget2D(game.GraphicsDevice, UI.GameView.Width, UI.GameView.Height);
 
-            // Subscribe to event handler
-            Start += new EventHandler(OnGameStart);
             Player.HP.Max = 10;
             Player.MP.Max = 10;
             Player.AP.Max = 2;
-            Player.Init();
+            Player.Initialize();
 
             Player.TextureName = "Player";
             Player.Bounds.X = 320;
@@ -138,7 +193,6 @@ namespace NaGaDeMo
 
             GameStateChange(State.GameStarted);
         }
-
 
         public enum State
         {
@@ -159,27 +213,36 @@ namespace NaGaDeMo
             switch (state)
             {
                 case State.GameStarted:
-                    Start(null, e);
-
+                    if (Start != null)
+                    {
+                        Start(null, e);
+                    }
                     break;
+
                 case State.StartPlayerTurn:
                     StartPlayerTurn();
                     break;
+
                 case State.WaitingForPlayer:
 
                     break;
+
                 case State.EndPlayerTurn:
                     EndPlayerTurn();
                     break;
+
                 case State.StartEnemyTurn:
                     StartEnemyTurn();
                     break;
+
                 case State.WaitingForEnemy:
 
                     break;
+
                 case State.EndEnemyTurn:
                     EndEnemyTurn();
                     break;
+
                 case State.GameStopped:
                     Environment.Exit(0);
                     break;
@@ -226,7 +289,7 @@ namespace NaGaDeMo
 
             graphicsDevice.Clear(Color.White);
 
-            spriteBatch.Begin(SpriteSortMode.Deferred, null,  null, null, null, null, Matrix.CreateTranslation(UI.MapPoint.X, UI.MapPoint.Y, 0));
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation(UI.MapPoint.X, UI.MapPoint.Y, 0));
 
             CurrentBattle.Draw(spriteBatch);
 
@@ -256,15 +319,7 @@ namespace NaGaDeMo
 
         #region Events
 
-        public static void OnGameStart(object sender, EventArgs e)
-        {
-            Debug.WriteLine("Game has started");
-        }
-
-        public static void OnPlayerTurn()
-        {
-
-        }
+        // TODO Engine Events
 
         #endregion
     }
@@ -283,7 +338,7 @@ namespace NaGaDeMo
         {
             public static void Draw(SpriteBatch spriteBatch)
             {
-              
+
                 foreach (Creature creature in Engine.CurrentBattle.Creatures)
                 {
                     spriteBatch.DrawString(UI.UIFont, "HP: " + creature.HP.Current, new Vector2(creature.Bounds.X, creature.Bounds.Y), Color.Red);
@@ -292,10 +347,59 @@ namespace NaGaDeMo
 
                 spriteBatch.DrawString(UI.UIFont, "MP: " + Engine.CurrentBattle.Player.MP.Current + "/" + Engine.CurrentBattle.Player.MP.Max, new Vector2(Engine.CurrentBattle.Player.Bounds.X, Engine.CurrentBattle.Player.Bounds.Y), Color.Blue, 0f, new Vector2(0, 0), 0.5f, SpriteEffects.None, 1.0f);
 
-                // Spell target
+                // Spell target single
                 if (Engine.CurrentCommandInput is CastSpellCommand)
                 {
-                    spriteBatch.Draw(UI.pixel, new Rectangle((UI.MousePoint.X / 64) * 64, (UI.MousePoint.Y / 64) * 64, 64, 64), Color.Red * 0.5f);
+                    CastSpellCommand Command = (CastSpellCommand)Engine.CurrentCommandInput;
+
+                    switch (Command.Spell.TargetType)
+                    {
+                        case TargetType.None:
+                            break;
+
+                        case TargetType.Self:
+                            break;
+
+                        case TargetType.Single:
+                            spriteBatch.Draw(UI.pixel, new Rectangle((UI.MousePoint.X / 64) * 64, (UI.MousePoint.Y / 64) * 64, 64, 64), Color.Red * 0.5f);
+                            break;
+
+                        case TargetType.Multiple:
+                            // Draws the Area of Effect
+                            for (var i = (UI.MousePoint.X / 64 * 64 - Command.Spell.Range * 64); i < (UI.MousePoint.X / 64 * 64 + Command.Spell.Range * 64 + 64); i += 64)
+                            {
+                                for (var j = (UI.MousePoint.Y / 64 * 64 - Command.Spell.Range * 64); j < (UI.MousePoint.Y / 64 * 64 + Command.Spell.Range * 64 + 64); j += 64)
+                                {
+                                    Point point = new Point(i + 32, j + 32);
+
+                                    Point origin = new Point(UI.MousePoint.X / 64 * 64 + 32, UI.MousePoint.Y / 64 * 64 + 32);
+
+                                    spriteBatch.Draw(UI.pixel, new Rectangle(origin.X, origin.Y, 5, 5), Color.Aqua);
+
+                                    int radius = (Command.Spell.Range * 64 + 32) * (Command.Spell.Range * 64 + 32);
+
+                                    int distance = ((point.X - origin.X) * (point.X - origin.X) + (point.Y - origin.Y) * (point.Y - origin.Y));
+
+                                    if (distance < radius)
+                                    {
+                                        spriteBatch.Draw(UI.pixel, new Rectangle(i / 64 * 64, j / 64 * 64, 64, 64), Color.Red * 0.5f);
+                                    }
+                                }
+                            }
+
+                            break;
+
+                        default:
+                            break;
+                    }
+
+
+                }
+
+                // Movement target
+                if (Engine.CurrentCommandInput is MoveCommand)
+                {
+                    spriteBatch.Draw(UI.pixel, new Rectangle((UI.MousePoint.X / 64) * 64, (UI.MousePoint.Y / 64) * 64, 64, 64), Color.Green * 0.5f);
                 }
 
             }
