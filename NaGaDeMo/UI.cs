@@ -12,7 +12,7 @@ namespace NaGaDeMo
     /// <summary>
     /// The UI Element Class is the base class of all User Interface Elements
     /// </summary>
-    public abstract class UIElement: XNAObject
+    public abstract class UIElement : XNAObject
     {
         public Rectangle Bounds = new Rectangle(0, 0, 64, 64);
 
@@ -20,7 +20,7 @@ namespace NaGaDeMo
 
         public virtual void Draw(SpriteBatch spritebatch)
         {
-            
+
         }
 
         public virtual void Update(GameTime gameTime)
@@ -34,7 +34,7 @@ namespace NaGaDeMo
 
         public virtual void LoadContent(ContentManager Content)
         {
-            
+
         }
     }
 
@@ -43,7 +43,7 @@ namespace NaGaDeMo
     /// </summary>
     public static class UI
     {
-        public static class Overlay 
+        public static class Overlay
         {
             public static void Draw(SpriteBatch spriteBatch)
             {
@@ -117,21 +117,76 @@ namespace NaGaDeMo
                 Engine.CurrentCommandInput = null;
             }
 
+            if (CurrentMouseState.MiddleButton == ButtonState.Pressed)
+            {
+
+                Point Movement = new Point();
+                Movement.X = (CurrentMouseState.X - PreviousMouseState.X);
+                Movement.Y = (CurrentMouseState.Y - PreviousMouseState.Y);
+
+                UI.MapPoint += Movement;
+
+                if (UI.MapPoint.X > 0)
+                {
+                    UI.MapPoint.X = 0;
+                }
+
+                if (UI.MapPoint.Y > 0)
+                {
+                    UI.MapPoint.Y = 0;
+                }
+
+
+                if (UI.MapPoint.X < -Engine.CurrentBattle.GameMap.Width * 64 + UI.GameView.Width)
+                {
+                    UI.MapPoint.X = -Engine.CurrentBattle.GameMap.Width * 64 + UI.GameView.Width;
+                }
+
+                if (UI.MapPoint.Y < -Engine.CurrentBattle.GameMap.Height * 64 + UI.GameView.Height)
+                {
+                    UI.MapPoint.Y = -Engine.CurrentBattle.GameMap.Height * 64 + UI.GameView.Height;
+                }
+
+
+            }
+
+        }
+    }
+
+    public class Textbox : UIElement
+    {
+        public event EventHandler OnUpdate;
+
+        public string Text;
+
+        public Textbox(int x, int y, int height, int width, string text)
+        {
+            Bounds.X = x;
+            Bounds.Y = y;
+            Bounds.Height = height;
+            Bounds.Width = width;
+            Text = text;
+        }
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            Vector2 measurement = UI.UIFont.MeasureString(Text);
+
+            spriteBatch.DrawString(UI.UIFont, Text, new Vector2(Bounds.X + (Bounds.Width / 2 - measurement.X / 2), Bounds.Y + (Bounds.Height / 2 - measurement.Y / 2)), Color.Black);
         }
     }
 
     public class Button : UIElement
     {
         public string Label;
-                
-        public Button(int x, int y, int height, int width)
+
+        public Button(int x, int y, int height, int width, string label)
         {
             Bounds.X = x;
             Bounds.Y = y;
             Bounds.Height = height;
             Bounds.Width = width;
-
-
+            Label = label;
         }
 
 
@@ -140,7 +195,7 @@ namespace NaGaDeMo
             Vector2 measurement = UI.UIFont.MeasureString(Label);
             spriteBatch.Draw(UI.pixel, Bounds, Color.White);
             spriteBatch.DrawString(UI.UIFont, Label, new Vector2(Bounds.X + (Bounds.Width / 2 - measurement.X / 2), Bounds.Y + (Bounds.Height / 2 - measurement.Y / 2)), Color.Black);
-            
+
         }
     }
 }

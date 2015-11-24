@@ -126,6 +126,7 @@ namespace NaGaDeMo
             Start += new EventHandler(OnGameStart);
             Player.HP.Max = 10;
             Player.MP.Max = 10;
+            Player.AP.Max = 2;
             Player.Init();
 
             Player.TextureName = "Player";

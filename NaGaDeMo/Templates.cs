@@ -17,12 +17,29 @@ namespace NaGaDeMo
             {
                 public static void Init()
                 {
-                    Button EndTurnButton = new Button(300, 300, 100, 300);
-                    EndTurnButton.Label = "End Turn";
-
+                    Button EndTurnButton = new Button(300, 300, 30, 100, "End Turn");
                     EndTurnButton.Click += EndTurnButton_Click;
 
+                    Button ExitButton = new Button(300, 800, 30, 100, "Exit");
+                    ExitButton.Click += ExitButton_Click;
+
+                    Textbox txtPlayerHP = new Textbox(300, 400, 30, 500, "HP: 10/10 ");
+
                     UI.Elements.Add(EndTurnButton);
+                    UI.Elements.Add(ExitButton);
+
+                    UI.Elements.Add(txtPlayerHP);
+                }
+
+                private static void TxtPlayerHP_OnUpdate(object sender, EventArgs e)
+                {
+                    Textbox textbox = (Textbox)sender;
+                    textbox.Text = "HP: " + Engine.CurrentBattle.Player.HP.Current + " / " + Engine.CurrentBattle.Player.HP.Max;
+                }
+
+                private static void ExitButton_Click(object sender, Microsoft.Xna.Framework.Input.MouseState mouseState)
+                {
+                    Environment.Exit(0);
                 }
 
                 private static void EndTurnButton_Click(object sender, Microsoft.Xna.Framework.Input.MouseState mouseState)

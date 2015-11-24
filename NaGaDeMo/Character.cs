@@ -79,6 +79,8 @@ namespace NaGaDeMo
     {
         public stat XP;
 
+        public stat AP;
+
         public delegate void KeyboardEventHandler(object sender, KeyboardState keyboardState);
 
         public event KeyboardEventHandler KeyPress;
@@ -88,6 +90,7 @@ namespace NaGaDeMo
             
             Engine.Start += OnGameStart;
 
+            
             KeyPress += Player_KeyPress;
             Click += Player_Click;
 
@@ -99,6 +102,7 @@ namespace NaGaDeMo
         {
             HP.Current = HP.Max;
             MP.Current = MP.Max;
+            AP.Current = AP.Max;
 
         }
 

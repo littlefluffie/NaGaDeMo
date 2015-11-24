@@ -15,26 +15,31 @@ namespace NaGaDeMo
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         
-
         public Main()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            //string screen_mode = ConfigurationManager.AppSettings.Get("screen_mode");
+            string screen_mode = ConfigurationManager.AppSettings.Get("screen_mode");
 
+            if (screen_mode == "fullscreen")
+            {
+                graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;  // set this value to the desired width of your window
+                graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;   // set this value to the desired height of your window
 
-                    //graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;  // set this value to the desired width of your window
-                    //graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;   // set this value to the desired height of your window
-                    //graphics.IsFullScreen = true;
+                UI.GameView.X = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width / 2 - UI.GameView.Width / 2;
+                UI.GameView.Y = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height / 2 - UI.GameView.Height / 2;
 
-                    //UI.GameView.X = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width / 2 - UI.GameView.Width / 2;
-                    //UI.GameView.Y = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height / 2 - UI.GameView.Height / 2;
+                graphics.IsFullScreen = true;
+            }
+            else
+            {
 
+            }
 
             graphics.PreferMultiSampling = true;
-            
-            this.IsMouseVisible = true;
+
+            IsMouseVisible = true;
         }
 
         /// <summary>
@@ -65,7 +70,7 @@ namespace NaGaDeMo
             UI.pixel = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
             UI.pixel.SetData(new[] {
                 Color.White
-    }); // so that we can draw whatever color we want on top of it
+            }); // so that we can draw whatever color we want on top of it
 
             Engine.LoadContent(Content);
             UI.LoadContent(Content);
@@ -124,7 +129,7 @@ namespace NaGaDeMo
 
 
             //Draw the UI
-           UI.Draw(spriteBatch);
+            UI.Draw(spriteBatch);
 
             // Render the game
             Engine.Draw(spriteBatch);
