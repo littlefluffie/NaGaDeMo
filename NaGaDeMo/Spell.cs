@@ -13,11 +13,6 @@ namespace NaGaDeMo
         Multiple
     }
 
-    public interface Castable
-    {
-        void Resolve(Character Caster, List<XNAObject> Targets);
-    }
-
     public delegate void SpellDelegate(Character Caster = null, List<XNAObject> Targets = null);
 
     // Maybe for Spells? Actions? Dunno 
@@ -26,7 +21,7 @@ namespace NaGaDeMo
 
     }
 
-    public class Spell : Castable
+    public class Spell
     {
         public TargetType TargetType { get; set; }
 
@@ -34,7 +29,7 @@ namespace NaGaDeMo
 
         public string SpellName { get; set; }
 
-        public int  Range { get; set; }
+        public int Range { get; set; }
 
         public SpellDelegate Method { get; set; }
 

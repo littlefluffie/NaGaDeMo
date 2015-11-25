@@ -43,6 +43,11 @@ namespace NaGaDeMo
         {
             Debug.WriteLine("You have clicked on a Tile at " + X + ", " + Y);
 
+            if (Engine.GameState != Engine.State.PlayersTurn)
+            {
+                return;
+            }
+
             if (Engine.CurrentCommandInput is MoveCommand)
             {
                 MoveCommand move = (MoveCommand)Engine.CurrentCommandInput;

@@ -10,34 +10,21 @@ using Microsoft.Xna.Framework.Input;
 namespace NaGaDeMo
 {
     /// <summary>
-    /// The UI Element Class is the base class of all User Interface Elements
-    /// </summary>
-    public abstract class UIElement : XNAObject
-    {
-        public UIElement()
-        {
-            Click += UIElement_Click;
-        }
-
-        private void UIElement_Click(object sender, MouseState mouseState)
-        {
-
-        }
-
-    }
-
-    /// <summary>
     /// The UI static class manages all User Interface related events and drawing
     /// </summary>
-    public static class UI
+    public static class UI 
     {
         public static class Overlay
         {
             public static void Draw(SpriteBatch spriteBatch)
             {
-                spriteBatch.DrawString(UI.UIFont, "Blah", new Vector2(10, 10), Color.Black);
+                spriteBatch.DrawString(UI.UIFont, "HP: " + Engine.CurrentBattle.Player.HP.Current, new Vector2(10, 10), Color.Black);
+                spriteBatch.DrawString(UI.UIFont, "MP: " + Engine.CurrentBattle.Player.MP.Current, new Vector2(10, 25), Color.Black);
+                spriteBatch.DrawString(UI.UIFont, "AP: " + Engine.CurrentBattle.Player.AP.Current, new Vector2(10, 40), Color.Black);
 
-                foreach (UIElement Element in Elements)
+                spriteBatch.DrawString(UIFont, (Engine.GameState == Engine.State.PlayersTurn) ? "YOUR TURN" : "OPPONENTS TURN", new Vector2(500, 20), Color.Red);
+
+                foreach (XNAObject Element in Elements)
                 {
                     Element.Draw(spriteBatch);
                 }
@@ -45,16 +32,14 @@ namespace NaGaDeMo
 
             public static void Update(GameTime gameTime)
             {
-                foreach (UIElement Element in Elements)
+                foreach (XNAObject Element in Elements)
                 {
                     Element.Update(gameTime);
                 }
             }
         }
 
-        public static Texture2D pixel;
-
-        public static Texture2D CircleOverlay;
+        public static Texture2D Pixel;
 
         public static MouseState CurrentMouseState;
         public static MouseState PreviousMouseState;
@@ -66,26 +51,26 @@ namespace NaGaDeMo
 
         public static Point MousePoint = new Point();
 
-        public static Texture2D SpellBookTexture;
         public static SpriteFont UIFont;
+
+        public static void Initialize()
+        {
+
+        }
 
         public static Rectangle GameView = new Rectangle(0, 0, 640, 640);
 
-        public static List<UIElement> Elements = new List<UIElement>();
+        public static List<XNAObject> Elements = new List<XNAObject>();
 
         public static void Draw(SpriteBatch spriteBatch)
         {
             // TODO Draw the UI
-            spriteBatch.Draw(SpellBookTexture, new Rectangle(0, 0, GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width, GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height), Color.White);
+
         }
 
         public static void LoadContent(ContentManager Content)
         {
-            // Somewhere in your LoadContent() method:
-            SpellBookTexture = Content.Load<Texture2D>("Spellbook");
             UIFont = Content.Load<SpriteFont>("Centaur");
-
-            CircleOverlay = Content.Load<Texture2D>("Circle");
         }
 
         public static void Update(GameTime gameTime)
@@ -144,7 +129,7 @@ namespace NaGaDeMo
         }
     }
 
-    public class Textbox : UIElement
+    public class Textbox : XNAObject
     {
         public event EventHandler OnUpdate;
 
@@ -167,7 +152,7 @@ namespace NaGaDeMo
         }
     }
 
-    public class Button : UIElement
+    public class Button : XNAObject
     {
         public string Label;
 
@@ -184,7 +169,7 @@ namespace NaGaDeMo
         public override void Draw(SpriteBatch spriteBatch)
         {
             Vector2 measurement = UI.UIFont.MeasureString(Label);
-            spriteBatch.Draw(UI.pixel, Bounds, Color.White);
+            spriteBatch.Draw(UI.Pixel, Bounds, Color.White);
             spriteBatch.DrawString(UI.UIFont, Label, new Vector2(Bounds.X + (Bounds.Width / 2 - measurement.X / 2), Bounds.Y + (Bounds.Height / 2 - measurement.Y / 2)), Color.Black);
 
         }

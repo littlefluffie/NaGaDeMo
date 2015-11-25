@@ -59,7 +59,6 @@ namespace NaGaDeMo
 
         public Player()
         {
-           
             KeyPress += Player_KeyPress;
             Click += Player_Click;
         }
@@ -87,6 +86,11 @@ namespace NaGaDeMo
         {
             Debug.WriteLine("You clicked yourself!");
 
+            if (Engine.GameState != Engine.State.PlayersTurn)
+            {
+                return;
+            }
+            
             if (Engine.CurrentCommandInput is CastSpellCommand)
             {
                 CastSpellCommand castspell = (CastSpellCommand)Engine.CurrentCommandInput;
@@ -104,6 +108,11 @@ namespace NaGaDeMo
 
         public void Player_KeyPress(object sender, KeyboardState keyboardState)
         {
+            if (Engine.GameState != Engine.State.PlayersTurn)
+            {
+                return;
+            }
+
             // Using key command for actions
 
             // Move command
@@ -120,7 +129,7 @@ namespace NaGaDeMo
             if (keyboardState.IsKeyDown(Keys.C))
             {
                 CastSpellCommand castspell = new CastSpellCommand();
-                castspell.Caster = this;
+                castspell.Player = this;
                 castspell.Spell = Templates.Spells.Spark();
 
                 Engine.CommandQueue.Add(castspell);
@@ -128,10 +137,17 @@ namespace NaGaDeMo
                 Engine.CurrentCommandInput = castspell;
             }
 
+            if (keyboardState.IsKeyDown(Keys.E))
+            {
+                // End turn
+
+                Engine.EndPlayerTurn();
+            }
+
             if (keyboardState.IsKeyDown(Keys.H))
             {
                 CastSpellCommand castspell = new CastSpellCommand();
-                castspell.Caster = this;
+                castspell.Player = this;
                 castspell.Spell = Templates.Spells.Heal();
 
                 Engine.CommandQueue.Add(castspell);
@@ -142,7 +158,7 @@ namespace NaGaDeMo
             if (keyboardState.IsKeyDown(Keys.F))
             {
                 CastSpellCommand castspell = new CastSpellCommand();
-                castspell.Caster = this;
+                castspell.Player = this;
                 castspell.Spell = Templates.Spells.Fireball();
 
                 Engine.CommandQueue.Add(castspell);
@@ -224,6 +240,11 @@ namespace NaGaDeMo
             Debug.WriteLine("X, Y: " + mouseState.X + " " + mouseState.Y);
 
             // Target of spell
+            if (Engine.GameState != Engine.State.PlayersTurn)
+            {
+                return;
+            }
+
             if (Engine.CurrentCommandInput is CastSpellCommand)
             {
                 CastSpellCommand castspell = (CastSpellCommand)Engine.CurrentCommandInput;

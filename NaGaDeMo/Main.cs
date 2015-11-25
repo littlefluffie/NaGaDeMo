@@ -30,7 +30,7 @@ namespace NaGaDeMo
                 UI.GameView.X = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width / 2 - UI.GameView.Width / 2;
                 UI.GameView.Y = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height / 2 - UI.GameView.Height / 2;
 
-                graphics.IsFullScreen = true;
+             //   graphics.IsFullScreen = true;
             }
             else
             {
@@ -53,7 +53,9 @@ namespace NaGaDeMo
             // TODO: Add your initialization logic here
             Engine.Initialize(this);
 
-            Templates.Interfaces.DefaultInterface.Init();
+            UI.Initialize();
+
+            //Templates.Interfaces.DefaultInterface.Init();
 
             base.Initialize();
         }
@@ -67,8 +69,8 @@ namespace NaGaDeMo
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            UI.pixel = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
-            UI.pixel.SetData(new[] {
+            UI.Pixel = new Texture2D(GraphicsDevice, 1, 1, false, SurfaceFormat.Color);
+            UI.Pixel.SetData(new[] {
                 Color.White
             }); // so that we can draw whatever color we want on top of it
 

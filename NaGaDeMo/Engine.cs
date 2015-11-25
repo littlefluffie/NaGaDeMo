@@ -83,13 +83,18 @@ namespace NaGaDeMo
 
     public class CastSpellCommand : Command
     {
-        public Character Caster;
+        public Player Player;
         public Spell Spell;
         public List<XNAObject> Targets = new List<XNAObject>();
 
         public override bool CanExecute()
         {
-            if (Caster.MP.Current < Spell.BaseManaCost)
+            if (Player.AP.Current == 0)
+            {
+                return false;
+            }
+
+            if (Player.MP.Current < Spell.BaseManaCost)
             {
                 Debug.WriteLine("Not enough Mana!");
                 return false;
@@ -102,8 +107,9 @@ namespace NaGaDeMo
 
         public override void Execute()
         {
-            Caster.MP.Current -= Spell.BaseManaCost;
-            Spell.Resolve(Caster, Targets);
+            Player.MP.Current -= Spell.BaseManaCost;
+            Player.AP.Current -= 1;
+            Spell.Resolve(Player, Targets);
         }
     }
 
@@ -116,10 +122,16 @@ namespace NaGaDeMo
         {
             Player.Bounds.X = MapPoint.X;
             Player.Bounds.Y = MapPoint.Y;
+            Player.AP.Current -= 1;
         }
 
         public override bool CanExecute()
         {
+            if (Player.AP.Current == 0)
+            {
+                return false;
+            }
+
             float distance = ((Player.Bounds.X - MapPoint.X) * (Player.Bounds.X - MapPoint.X) + (Player.Bounds.Y - MapPoint.Y) * (Player.Bounds.Y - MapPoint.Y));
 
             if (distance < (64 * 3) * (64 * 3))
@@ -156,6 +168,8 @@ namespace NaGaDeMo
 
         public static event EventHandler GameEnd;
 
+        public static event EventHandler GameStateChange;
+
         private static EventArgs e = null;
 
         public delegate void EventHandler(object sender, EventArgs e);
@@ -173,11 +187,26 @@ namespace NaGaDeMo
         // The Player
         public static Player Player = new Player();
 
+        // The Opponent
+        public static Opponent Opponent = new Opponent(Templates.Opponents.AI.EasyAI);
+
         // The Current Battle
         public static Battle CurrentBattle = new Battle();
 
         // Game state
-        public static State GameState = State.GameStopped;
+        private static State gameState = State.Upkeep;
+        public static State GameState
+        {
+            get
+            {
+                return gameState;
+            }
+            set
+            {
+                gameState = value;
+                GameStateChange(null, e);
+            }
+        }
 
         // Command stuff
 
@@ -192,6 +221,7 @@ namespace NaGaDeMo
             // Setup Buffer
             MapBuffer = new RenderTarget2D(game.GraphicsDevice, UI.GameView.Width, UI.GameView.Height);
 
+            // Initialize player variables
             Player.HP.Max = 10;
             Player.MP.Max = 10;
             Player.AP.Max = 2;
@@ -201,89 +231,44 @@ namespace NaGaDeMo
             Player.Bounds.X = 320;
             Player.Bounds.Y = 128;
 
+            // Setup Opponent
+            
+            
+            // Setup Battle
             CurrentBattle = Templates.Battles.DefaultBattle();
             CurrentBattle.Player = Player;
 
-            GameStateChange(State.GameStarted);
+            // Events registration
+            GameStart += Engine_GameStart;
+            RoundStart += Engine_RoundStart;
+            PlayerTurnStart += Engine_PlayerTurnStart;
+            PlayerTurnEnd += Engine_PlayerTurnEnd;
+            OpponentTurnStart += Engine_OpponentTurnStart;
+            OpponentTurnEnd += Engine_OpponentTurnEnd;
+            RoundEnd += Engine_RoundEnd;
+            GameEnd += Engine_GameEnd;
+
+            GameStateChange += Engine_GameStateChange;
+
+            // Start game
+            GameStart(null, e);
+        }
+
+        public static void EndPlayerTurn()
+        {
+            PlayerTurnEnd(null, e);
+        }
+
+        public static void EndOpponentTurn()
+        {
+            OpponentTurnEnd(null, e);
         }
 
         public enum State
         {
-            GameStarted,
-            StartPlayerTurn,
-            WaitingForPlayer,
-            EndPlayerTurn,
-            StartEnemyTurn,
-            WaitingForEnemy,
-            EndEnemyTurn,
-            GameStopped
-        }
-
-        public static void GameStateChange(State state)
-        {
-            GameState = state;
-
-            switch (state)
-            {
-                case State.GameStarted:
-                    if (GameStart != null)
-                    {
-                        GameStart(null, e);
-                    }
-                    break;
-
-                case State.StartPlayerTurn:
-                                        if (GameStart != null)
-                    {
-                        GameStart(null, e);
-                    }
-                    break;
-
-                case State.WaitingForPlayer:
-                    break;
-                case State.EndPlayerTurn:
-                    break;
-
-                case State.StartEnemyTurn:
-                    break;
-
-                case State.WaitingForEnemy:
-                    break;
-
-                case State.EndEnemyTurn:
-                    break;
-
-                case State.GameStopped:
-                    break;
-
-                default:
-                    break;
-            }
-
-        }
-
-        private static void EndEnemyTurn()
-        {
-            throw new NotImplementedException();
-        }
-
-        private static void StartEnemyTurn()
-        {
-            throw new NotImplementedException();
-        }
-
-        private static void EndPlayerTurn()
-        {
-            throw new NotImplementedException();
-        }
-
-        private static void StartPlayerTurn()
-        {
-            Debug.WriteLine("Player's Turn");
-
-            // TODO Player Start stuff
-
-            GameStateChange(State.WaitingForPlayer);
+            Upkeep,
+            PlayersTurn,
+            OpponentsTurn
         }
 
         public static void Draw(SpriteBatch spriteBatch)
@@ -334,14 +319,91 @@ namespace NaGaDeMo
 
         // TODO Engine Events
 
+        private static void Engine_GameStart(object sender, EventArgs e)
+        {
+            RoundStart(null, e);
+            
+        }
+
+        private static void Engine_RoundStart(object sender, EventArgs e)
+        {
+            GameState = State.PlayersTurn;
+            Player.MP.Current += 3;
+            Player.AP.Current = Player.AP.Max;
+        }
+
+        private static void Engine_PlayerTurnStart(object sender, EventArgs e)
+        {
+           
+        }
+
+        private static void Engine_PlayerTurnEnd(object sender, EventArgs e)
+        {
+            GameState = State.OpponentsTurn;
+            
+        }
+
+        private static void Engine_OpponentTurnStart(object sender, EventArgs e)
+        {
+            
+        }
+
+        private static void Engine_OpponentTurnEnd(object sender, EventArgs e)
+        {
+            RoundEnd(null, e);
+        }
+
+        private static void Engine_RoundEnd(object sender, EventArgs e)
+        {
+            RoundStart(null, e);
+        }
+
+        private static void Engine_GameEnd(object sender, EventArgs e)
+        {
+            Debug.WriteLine("The game has ended");
+            Environment.Exit(0);
+        }
+
+
+        private static void Engine_GameStateChange(object sender, EventArgs e)
+        {
+            if (gameState == State.OpponentsTurn)
+            {
+                OpponentTurnStart(null, e);
+            }
+
+            if (gameState == State.PlayersTurn)
+            {
+                PlayerTurnStart(null, e);
+            }
+        }
+
         #endregion
     }
 
     public class Opponent
     {
-        public void MakeDecision(Battle battle)
-        {
+        public delegate void DecisionDelegate();
 
+        public DecisionDelegate MakeDecision;
+
+        public Opponent(DecisionDelegate AI)
+        {
+            Engine.OpponentTurnStart += Engine_OpponentTurnStart;
+            Engine.OpponentTurnEnd += Engine_OpponentTurnEnd;
+            MakeDecision = AI;
+        }
+
+        private void Engine_OpponentTurnEnd(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void Engine_OpponentTurnStart(object sender, EventArgs e)
+        {
+            Debug.WriteLine("Opponent: Mmmm...");
+            MakeDecision();
+            Engine.EndOpponentTurn();
         }
     }
 
@@ -374,7 +436,7 @@ namespace NaGaDeMo
                             break;
 
                         case TargetType.Single:
-                            spriteBatch.Draw(UI.pixel, new Rectangle((UI.MousePoint.X / 64) * 64, (UI.MousePoint.Y / 64) * 64, 64, 64), Color.Red * 0.5f);
+                            spriteBatch.Draw(UI.Pixel, new Rectangle((UI.MousePoint.X / 64) * 64, (UI.MousePoint.Y / 64) * 64, 64, 64), Color.Red * 0.5f);
                             break;
 
                         case TargetType.Multiple:
@@ -387,7 +449,7 @@ namespace NaGaDeMo
 
                                     Point origin = new Point(UI.MousePoint.X / 64 * 64 + 32, UI.MousePoint.Y / 64 * 64 + 32);
 
-                                    spriteBatch.Draw(UI.pixel, new Rectangle(origin.X, origin.Y, 5, 5), Color.Aqua);
+                                    spriteBatch.Draw(UI.Pixel, new Rectangle(origin.X, origin.Y, 5, 5), Color.Aqua);
 
                                     int radius = (Command.Spell.Range * 64 + 32) * (Command.Spell.Range * 64 + 32);
 
@@ -395,7 +457,7 @@ namespace NaGaDeMo
 
                                     if (distance < radius)
                                     {
-                                        spriteBatch.Draw(UI.pixel, new Rectangle(i / 64 * 64, j / 64 * 64, 64, 64), Color.Red * 0.5f);
+                                        spriteBatch.Draw(UI.Pixel, new Rectangle(i / 64 * 64, j / 64 * 64, 64, 64), Color.Red * 0.5f);
                                     }
                                 }
                             }
@@ -412,19 +474,18 @@ namespace NaGaDeMo
                 // Movement target
                 if (Engine.CurrentCommandInput is MoveCommand)
                 {
-                    spriteBatch.Draw(UI.pixel, new Rectangle((UI.MousePoint.X / 64) * 64, (UI.MousePoint.Y / 64) * 64, 64, 64), Color.Green * 0.5f);
+                    spriteBatch.Draw(UI.Pixel, new Rectangle((UI.MousePoint.X / 64) * 64, (UI.MousePoint.Y / 64) * 64, 64, 64), Color.Green * 0.5f);
                 }
 
             }
 
         }
+
         public Player Player;
 
         public int TurnNumber;
 
         public Map GameMap = new Map();
-
-        public Opponent Opponent = new Opponent();
 
         public List<Creature> Creatures = new List<Creature>();
 

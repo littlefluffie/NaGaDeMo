@@ -4,29 +4,48 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
+
 namespace NaGaDeMo
 {
-
-
     public static class Templates
     {
+        public static class Opponents
+        {
+            public static class AI
+            {
+                public static void EasyAI()
+                {
+                    foreach (Creature Creature in Engine.CurrentBattle.Creatures)
+                    {
+                        Random r = new Random();
+
+                        Creature.Bounds.X += 64 * r.Next(-1, 1);
+                        Creature.Bounds.Y += 64 * r.Next(-1, 1);
+
+                    }
+                }
+
+            }
+
+        }
+        /*
         public static class Interfaces
         {
             public static class DefaultInterface
             {
+                 
+
                 public static void Init()
                 {
                     Button EndTurnButton = new Button(300, 300, 30, 100, "End Turn");
-                    EndTurnButton.Click += EndTurnButton_Click;
-
                     Button ExitButton = new Button(300, 800, 30, 100, "Exit");
-                    ExitButton.Click += ExitButton_Click;
-
                     Textbox txtPlayerHP = new Textbox(300, 400, 30, 500, "HP: 10/10 ");
+
+                    EndTurnButton.Click += EndTurnButton_Click;
+                    ExitButton.Click += ExitButton_Click;
 
                     UI.Elements.Add(EndTurnButton);
                     UI.Elements.Add(ExitButton);
-
                     UI.Elements.Add(txtPlayerHP);
                 }
 
@@ -43,11 +62,19 @@ namespace NaGaDeMo
 
                 private static void EndTurnButton_Click(object sender, Microsoft.Xna.Framework.Input.MouseState mouseState)
                 {
+                    if (Engine.GameState != Engine.State.PlayersTurn)
+                    {
+                        return;
+                    }
+
+                    Engine.EndPlayerTurn();
+
                     Debug.WriteLine("Ending turn...");
+
                 }
             }
         }
-
+        */
         public static class Creatures
         {
             public static Creature Goblin(int X, int Y)
@@ -84,7 +111,7 @@ namespace NaGaDeMo
                 spell.TargetType = TargetType.Multiple;
                 spell.SpellName = "Fireball";
                 spell.Method = Methods.Fireball;
-                spell.Range = 1;
+                spell.Range = 3;
                 spell.BaseManaCost = 6;
 
                 return spell;
