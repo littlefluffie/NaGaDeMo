@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Content;
 
 namespace NaGaDeMo
 {
@@ -17,11 +20,17 @@ namespace NaGaDeMo
                 {
                     foreach (Creature Creature in Engine.CurrentBattle.Creatures)
                     {
+                        if (Creature.InRange(Engine.CurrentBattle.Player, 1))
+                        {
+                            List<XNAObject> Target = new List<XNAObject>();
+                            Target.Add(Engine.CurrentBattle.Player);
+                            Creature.Actions[0].Resolve(Creature, Target);
+                        }
+                        
                         Random r = new Random();
 
                         Creature.Bounds.X += 64 * r.Next(-1, 1);
                         Creature.Bounds.Y += 64 * r.Next(-1, 1);
-
                     }
                 }
 
@@ -88,71 +97,103 @@ namespace NaGaDeMo
                 creature.Y = Y;
                 creature.Bounds.X = X * 64;
                 creature.Bounds.Y = Y * 64;
+                creature.Actions.Add(Actions.Attacks.GoblinAttack());
                 return creature;
             }
         }
 
-        public static class Spells
+        public static class Actions
         {
-            public static Spell Spark()
+            public static class Attacks
             {
-                Spell spell = new Spell();
-                spell.TargetType = TargetType.Single;
-                spell.SpellName = "Spark";
-                spell.Method = Methods.Spark;
-                spell.BaseManaCost = 3;
-
-                return spell;
-            }
-
-            public static Spell Fireball()
-            {
-                Spell spell = new Spell();
-                spell.TargetType = TargetType.Multiple;
-                spell.SpellName = "Fireball";
-                spell.Method = Methods.Fireball;
-                spell.Range = 3;
-                spell.BaseManaCost = 6;
-
-                return spell;
-            }
-
-            public static Spell Heal()
-            {
-                Spell spell = new Spell();
-                spell.TargetType = TargetType.Self;
-                spell.SpellName = "Heal";
-                spell.Method = Methods.Heal;
-                spell.BaseManaCost = 3;
-
-                return spell;
-            }
-        }
-
-        public static class Methods
-        {
-            public static void Fireball(Character Caster = null, List<XNAObject> Targets = null)
-            {
-                foreach (Character Character in Targets)
+                public static Attack GoblinAttack()
                 {
-                    Character.Damage(10);
+                    Attack attack = new Attack();
+                    attack.APCost = 1;
+                    attack.Method = Methods.BasicAttack;
+
+                    return attack;
+                }
+
+                public static class Methods
+                {
+                    public static void BasicAttack(Character Attacker = null, List<XNAObject> Targets = null)
+                    {
+                        foreach (Character Character in Targets)
+                        {
+                            Character.Damage(4);
+                        }
+                    }
                 }
             }
 
-            public static void Spark(Character Caster, List<XNAObject> Targets)
+            public static class Spells
             {
-                foreach (Creature Creature in Targets)
+                public static Spell Spark()
                 {
-                    Creature.Damage(5);
+                    Spell spell = new Spell();
+                    spell.TargetType = TargetType.Single;
+                    spell.SpellName = "Spark";
+                    spell.Method = Methods.Spark;
+                    spell.BaseManaCost = 3;
+                    spell.APCost = 1;
+
+                    return spell;
+                }
+
+                public static Spell Fireball()
+                {
+                    Spell spell = new Spell();
+                    spell.TargetType = TargetType.Multiple;
+                    spell.SpellName = "Fireball";
+                    spell.Method = Methods.Fireball;
+                    spell.Range = 1;
+                    spell.BaseManaCost = 6;
+                    spell.APCost = 1;
+
+                    return spell;
+                }
+
+                public static Spell Heal()
+                {
+                    Spell spell = new Spell();
+                    spell.TargetType = TargetType.Self;
+                    spell.SpellName = "Heal";
+                    spell.Method = Methods.Heal;
+                    spell.BaseManaCost = 3;
+                    spell.APCost = 1;
+
+                    return spell;
                 }
             }
 
-            public static void Heal(Character Caster, List<XNAObject> Targets)
+            public static class Methods
             {
-                Caster.HP.Current += 5;
-                Debug.WriteLine("Blessed Healing!");
+                public static void Fireball(Character Caster = null, List<XNAObject> Targets = null)
+                {
+                    foreach (Character Character in Targets)
+                    {
+                        Character.Damage(10);
+                    }
+                }
+
+                public static void Spark(Character Caster, List<XNAObject> Targets)
+                {
+                    foreach (Creature Creature in Targets)
+                    {
+                        Creature.Damage(5);
+                    }
+                }
+
+                public static void Heal(Character Caster, List<XNAObject> Targets)
+                {
+                    Caster.HP.Current += 5;
+                    Debug.WriteLine("Blessed Healing!");
+                }
             }
+
         }
+
 
         public static class Maps
         {

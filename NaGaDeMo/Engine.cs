@@ -10,6 +10,14 @@ using Microsoft.Xna.Framework.Content;
 
 namespace NaGaDeMo
 {
+
+    /// <summary>
+    /// The XNAObject abstract class is the base call for any object that is handled by XNA events/methods.
+    /// 
+    /// All objects that are drawn and updated by the Main program are included here.
+    /// 
+    /// </summary>
+    /// 
     public abstract class XNAObject
     {
         public Rectangle Bounds = new Rectangle(0, 0, 64, 64);
@@ -58,6 +66,27 @@ namespace NaGaDeMo
         public bool InRange(Point origin, int range)
         {
             Point point = new Point(Bounds.X + 32, Bounds.Y + 32);
+
+            int radius = (range * 64 + 32) * (range * 64 + 32);
+
+            int distance = ((point.X - origin.X) * (point.X - origin.X) + (point.Y - origin.Y) * (point.Y - origin.Y));
+
+            if (distance < radius)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+
+        public bool InRange(Character Character, int range)
+        {
+            Point point = new Point(Bounds.X + 32, Bounds.Y + 32);
+
+            Point origin = new Point(Character.Bounds.X + 32, Character.Bounds.Y + 32);
 
             int radius = (range * 64 + 32) * (range * 64 + 32);
 
@@ -328,6 +357,8 @@ namespace NaGaDeMo
         private static void Engine_RoundStart(object sender, EventArgs e)
         {
             GameState = State.PlayersTurn;
+
+            // Transfer functionality to classes?
             Player.MP.Current += 3;
             Player.AP.Current = Player.AP.Max;
         }

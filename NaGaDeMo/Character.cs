@@ -16,6 +16,7 @@ namespace NaGaDeMo
         public string Name;
 
         public List<Spell> Spellbook = new List<Spell>();
+        public List<Action> Actions = new List<Action>();
 
         public int X;
         public int Y;
@@ -130,7 +131,7 @@ namespace NaGaDeMo
             {
                 CastSpellCommand castspell = new CastSpellCommand();
                 castspell.Player = this;
-                castspell.Spell = Templates.Spells.Spark();
+                castspell.Spell = Templates.Actions.Spells.Spark();
 
                 Engine.CommandQueue.Add(castspell);
 
@@ -148,7 +149,7 @@ namespace NaGaDeMo
             {
                 CastSpellCommand castspell = new CastSpellCommand();
                 castspell.Player = this;
-                castspell.Spell = Templates.Spells.Heal();
+                castspell.Spell = Templates.Actions.Spells.Heal();
 
                 Engine.CommandQueue.Add(castspell);
 
@@ -159,7 +160,7 @@ namespace NaGaDeMo
             {
                 CastSpellCommand castspell = new CastSpellCommand();
                 castspell.Player = this;
-                castspell.Spell = Templates.Spells.Fireball();
+                castspell.Spell = Templates.Actions.Spells.Fireball();
 
                 Engine.CommandQueue.Add(castspell);
 
