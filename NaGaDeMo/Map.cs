@@ -122,7 +122,7 @@ namespace NaGaDeMo
     public class Map : XNAObject
     {
         public List<Tile> Tiles = new List<Tile>();
-        
+
         public int Width;
         public int Height;
 
@@ -164,15 +164,30 @@ namespace NaGaDeMo
             }
         }
 
+        public void DrawCollisionMap(SpriteBatch spriteBatch)
+        {
+            foreach (Tile tile in Tiles)
+            {
+                tile.Draw(spriteBatch, CollisionMap);
+            }
+
+            foreach (Character character in Engine.Characters)
+            {
+                spriteBatch.Draw(UI.Pixel, character.Bounds, Color.Black);
+            }
+        }
+
         public override void LoadContent(ContentManager content)
         {
             TextureMap = content.Load<Texture2D>("terrain");
+            CollisionMap = content.Load<Texture2D>("terrain" + "_collision");
         }
 
         public Texture2D TextureMap;
+        public Texture2D CollisionMap;
 
         public string MapFile;
 
-     }
+    }
 }
 

@@ -18,6 +18,8 @@ namespace NaGaDeMo
             {
                 public static void EasyAI()
                 {
+                    Random r = new Random();
+
                     foreach (Creature Creature in Engine.CurrentBattle.Creatures)
                     {
                         if (Creature.InRange(Engine.CurrentBattle.Player, 1))
@@ -26,11 +28,10 @@ namespace NaGaDeMo
                             Target.Add(Engine.CurrentBattle.Player);
                             Creature.Actions[0].Resolve(Creature, Target);
                         }
-                        
-                        Random r = new Random();
 
-                        Creature.Bounds.X += 64 * r.Next(-1, 1);
-                        Creature.Bounds.Y += 64 * r.Next(-1, 1);
+                        Vector2 Direction = new Vector2(r.Next(-1, 2), r.Next(-1, 2));
+
+                        Creature.Move(Direction, 64);
                     }
                 }
 
@@ -208,6 +209,18 @@ namespace NaGaDeMo
 
                 return map;
             }
+
+            public static Map PathFinder()
+            {
+                Map map = new Map();
+                map.TextureName = "terrain.png";
+                map.MapFile = "PathFinding.txt";
+
+                map.GenerateTiles();
+
+                return map;
+
+            }
         }
 
         public static class Battles
@@ -226,6 +239,15 @@ namespace NaGaDeMo
 
                 battle.Creatures.Add(Creatures.Goblin(8, 2));
 
+                return battle;
+            }
+
+            public static Battle PathFinding()
+            {
+                Battle battle = new Battle();
+
+                battle.GameMap = Maps.PathFinder();
+                
                 return battle;
             }
 

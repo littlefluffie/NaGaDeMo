@@ -14,6 +14,14 @@ namespace NaGaDeMo
     /// </summary>
     public static class UI 
     {
+        public static void DrawLine(SpriteBatch batch, float width, Color color, Vector2 point1, Vector2 point2)
+        {
+            float angle = (float)Math.Atan2(point2.Y - point1.Y, point2.X - point1.X);
+            float length = Vector2.Distance(point1, point2);
+
+            batch.Draw(Pixel, point1, null, color, angle, Vector2.Zero, new Vector2(length, width), SpriteEffects.None, 0);
+        }
+
         public static class Overlay
         {
             public static void Draw(SpriteBatch spriteBatch)
@@ -28,6 +36,8 @@ namespace NaGaDeMo
                 {
                     Element.Draw(spriteBatch);
                 }
+
+                //DrawLine(spriteBatch, 5f, Color.Red, new Vector2(0, 0), new Vector2(500, 300));
             }
 
             public static void Update(GameTime gameTime)

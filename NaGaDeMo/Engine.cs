@@ -67,6 +67,9 @@ namespace NaGaDeMo
         {
             Point point = new Point(Bounds.X + 32, Bounds.Y + 32);
 
+            origin.X = origin.X / 64 * 64 + 32;
+            origin.Y = origin.Y / 64 * 64 + 32;
+
             int radius = (range * 64 + 32) * (range * 64 + 32);
 
             int distance = ((point.X - origin.X) * (point.X - origin.X) + (point.Y - origin.Y) * (point.Y - origin.Y));
@@ -149,8 +152,7 @@ namespace NaGaDeMo
 
         public override void Execute()
         {
-            Player.Bounds.X = MapPoint.X;
-            Player.Bounds.Y = MapPoint.Y;
+            Player.Move(MapPoint);
             Player.AP.Current -= 1;
         }
 
@@ -161,16 +163,14 @@ namespace NaGaDeMo
                 return false;
             }
 
-            float distance = ((Player.Bounds.X - MapPoint.X) * (Player.Bounds.X - MapPoint.X) + (Player.Bounds.Y - MapPoint.Y) * (Player.Bounds.Y - MapPoint.Y));
-
-            if (distance < (64 * 3) * (64 * 3))
+            if (Player.InRange(MapPoint, 3))
             {
-                Debug.WriteLine("Within range " + distance);
+
                 return true;
             }
             else
             {
-                Debug.WriteLine("Too far! " + distance);
+                Debug.WriteLine("Too far! ");
                 return false;
             }
         }
@@ -212,6 +212,7 @@ namespace NaGaDeMo
         // Map buffer
         // Check if necessary
         public static RenderTarget2D MapBuffer;
+        public static RenderTarget2D CollisionBuffer;
 
         // The Player
         public static Player Player = new Player();
@@ -250,6 +251,8 @@ namespace NaGaDeMo
             // Setup Buffer
             MapBuffer = new RenderTarget2D(game.GraphicsDevice, UI.GameView.Width, UI.GameView.Height);
 
+            CollisionBuffer = new RenderTarget2D(game.GraphicsDevice, UI.GameView.Width, UI.GameView.Height);
+
             // Initialize player variables
             Player.HP.Max = 10;
             Player.MP.Max = 10;
@@ -257,14 +260,14 @@ namespace NaGaDeMo
             Player.Initialize();
 
             Player.TextureName = "Player";
-            Player.Bounds.X = 320;
-            Player.Bounds.Y = 128;
+            Player.Bounds.X = 3 * 64;
+            Player.Bounds.Y = 10 * 64;
 
             // Setup Opponent
-            
-            
+
+
             // Setup Battle
-            CurrentBattle = Templates.Battles.DefaultBattle();
+            CurrentBattle = Templates.Battles.PathFinding();
             CurrentBattle.Player = Player;
 
             // Events registration
@@ -303,6 +306,11 @@ namespace NaGaDeMo
         public static void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(MapBuffer, UI.GameView, Color.White);
+
+
+            spriteBatch.Draw(UI.Pixel, new Rectangle (UI.CurrentMouseState.X,UI.CurrentMouseState.Y,5,5), Color.White);
+
+            // spriteBatch.Draw(CollisionBuffer, UI.GameView, Color.White * 0.5f);
         }
 
         /// <summary>
@@ -319,6 +327,23 @@ namespace NaGaDeMo
             spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation(UI.MapPoint.X, UI.MapPoint.Y, 0));
 
             CurrentBattle.Draw(spriteBatch);
+
+            spriteBatch.End();
+
+            graphicsDevice.SetRenderTarget(null);
+
+
+        }
+
+        public static void BufferCollisionMap(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
+        {
+            graphicsDevice.SetRenderTarget(CollisionBuffer);
+
+            graphicsDevice.Clear(Color.White);
+
+            spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, Matrix.CreateTranslation(UI.MapPoint.X, UI.MapPoint.Y, 0));
+
+            CurrentBattle.GameMap.DrawCollisionMap(spriteBatch);
 
             spriteBatch.End();
 
@@ -351,7 +376,7 @@ namespace NaGaDeMo
         private static void Engine_GameStart(object sender, EventArgs e)
         {
             RoundStart(null, e);
-            
+
         }
 
         private static void Engine_RoundStart(object sender, EventArgs e)
@@ -365,18 +390,18 @@ namespace NaGaDeMo
 
         private static void Engine_PlayerTurnStart(object sender, EventArgs e)
         {
-           
+
         }
 
         private static void Engine_PlayerTurnEnd(object sender, EventArgs e)
         {
             GameState = State.OpponentsTurn;
-            
+
         }
 
         private static void Engine_OpponentTurnStart(object sender, EventArgs e)
         {
-            
+
         }
 
         private static void Engine_OpponentTurnEnd(object sender, EventArgs e)
@@ -409,6 +434,8 @@ namespace NaGaDeMo
             }
         }
 
+
+
         #endregion
     }
 
@@ -427,7 +454,7 @@ namespace NaGaDeMo
 
         private void Engine_OpponentTurnEnd(object sender, EventArgs e)
         {
-            
+
         }
 
         private void Engine_OpponentTurnStart(object sender, EventArgs e)
@@ -498,18 +525,21 @@ namespace NaGaDeMo
                         default:
                             break;
                     }
-
-
                 }
 
                 // Movement target
                 if (Engine.CurrentCommandInput is MoveCommand)
                 {
-                    spriteBatch.Draw(UI.Pixel, new Rectangle((UI.MousePoint.X / 64) * 64, (UI.MousePoint.Y / 64) * 64, 64, 64), Color.Green * 0.5f);
+                    MoveCommand move = (MoveCommand)Engine.CurrentCommandInput;
+                    UI.DrawLine(spriteBatch, 2f, (move.Player.InRange(new Point(UI.MousePoint.X / 64 * 64 + 32, UI.MousePoint.Y / 64 * 64 + 32), 3)) ? Color.Green * 0.5f : Color.Red * 0.5f, new Vector2(move.Player.Bounds.X + 32, move.Player.Bounds.Y + 32), new Vector2(UI.MousePoint.X / 64 * 64 + 32, UI.MousePoint.Y / 64 * 64 + 32));
+                    spriteBatch.Draw(UI.Pixel, new Rectangle((UI.MousePoint.X / 64) * 64, (UI.MousePoint.Y / 64) * 64, 64, 64), (move.Player.InRange(new Point(UI.MousePoint.X / 64 * 64 + 32, UI.MousePoint.Y / 64 * 64 + 32), 3)) ? Color.Green * 0.5f : Color.Red * 0.5f);
                 }
-
             }
+        }
 
+        public void GetPixel()
+        {
+            
         }
 
         public Player Player;

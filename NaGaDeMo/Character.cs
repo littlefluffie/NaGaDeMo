@@ -47,6 +47,18 @@ namespace NaGaDeMo
                 Death(this, null);
             }
         }
+
+        public void Move (Point Location)
+        {
+            Bounds.X = Location.X;
+            Bounds.Y = Location.Y;
+        }
+
+        public void Move (Vector2 Direction, float Speed)
+        {
+            Bounds.X += (int)(Direction.X * Speed);
+            Bounds.Y += (int)(Direction.Y * Speed);
+        }
     }
 
     public class Player : Character

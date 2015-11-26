@@ -125,6 +125,8 @@ namespace NaGaDeMo
         {
             Engine.BufferMap(GraphicsDevice, spriteBatch);
 
+            Engine.BufferCollisionMap(GraphicsDevice, spriteBatch);
+
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             spriteBatch.Begin();
