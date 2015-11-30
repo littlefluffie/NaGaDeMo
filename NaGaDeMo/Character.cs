@@ -23,6 +23,7 @@ namespace NaGaDeMo
 
         public stat HP;
         public stat MP;
+        public stat AP;
 
         public delegate void MouseEventHandler(object sender, MouseState mouseState);
 
@@ -37,6 +38,12 @@ namespace NaGaDeMo
         {
             HP.Current = HP.Max;
             MP.Current = MP.Max;
+            AP.Current = AP.Max;
+        }
+
+        public void TurnRefresh()
+        {
+            AP.Current = AP.Max;
         }
 
         public void Damage(int damage)
@@ -64,7 +71,6 @@ namespace NaGaDeMo
     public class Player : Character
     {
         public stat XP;
-        public stat AP;
 
         public delegate void KeyboardEventHandler(object sender, KeyboardState keyboardState);
 
@@ -74,13 +80,6 @@ namespace NaGaDeMo
         {
             KeyPress += Player_KeyPress;
             Click += Player_Click;
-        }
-
-        public override void Initialize()
-        {
-            base.Initialize();
-
-            AP.Current = AP.Max;
         }
 
         public override void Update(GameTime gametime)
@@ -103,19 +102,23 @@ namespace NaGaDeMo
             {
                 return;
             }
-            
-            if (Engine.CurrentCommandInput is CastSpellCommand)
+            else
             {
-                CastSpellCommand castspell = (CastSpellCommand)Engine.CurrentCommandInput;
-                if (castspell.Spell.TargetType == TargetType.Self && castspell.CanExecute(castspell.Spell))
-                {
-                    castspell.Targets.Add(this);
-                    castspell.Execute();
 
-                    Engine.CommandList.Add(castspell);
-                    Engine.CommandQueue.Remove(castspell);
-                    Engine.CurrentCommandInput = null;
+                if (Engine.CurrentCommandInput is CastSpellCommand)
+                {
+                    CastSpellCommand castspell = (CastSpellCommand)Engine.CurrentCommandInput;
+                    if (castspell.Spell.TargetType == TargetType.Self && castspell.CanExecute(castspell.Spell))
+                    {
+                        castspell.Targets.Add(this);
+                        castspell.Execute();
+
+                        Engine.CommandList.Add(castspell);
+                        Engine.CommandQueue.Remove(castspell);
+                        Engine.CurrentCommandInput = null;
+                    }
                 }
+
             }
         }
 
@@ -125,107 +128,104 @@ namespace NaGaDeMo
             {
                 return;
             }
-
-            // Using key command for actions
-
-            // Move command
-            if (keyboardState.IsKeyDown(Keys.M))
+            else
             {
-                MoveCommand move = new MoveCommand();
-                move.Player = this;
+                // Using key command for actions
 
-                Engine.CommandQueue.Add(move);
-
-                Engine.CurrentCommandInput = move;
-            }
-
-            if (keyboardState.IsKeyDown(Keys.C))
-            {
-                CastSpellCommand castspell = new CastSpellCommand();
-                castspell.Player = this;
-                castspell.Spell = Templates.Actions.Spells.Spark();
-
-                Engine.CommandQueue.Add(castspell);
-
-                Engine.CurrentCommandInput = castspell;
-            }
-
-            if (keyboardState.IsKeyDown(Keys.E))
-            {
-                // End turn
-
-                Engine.EndPlayerTurn();
-            }
-
-            if (keyboardState.IsKeyDown(Keys.H))
-            {
-                CastSpellCommand castspell = new CastSpellCommand();
-                castspell.Player = this;
-                castspell.Spell = Templates.Actions.Spells.Heal();
-
-                Engine.CommandQueue.Add(castspell);
-
-                Engine.CurrentCommandInput = castspell;
-            }
-
-            if (keyboardState.IsKeyDown(Keys.F))
-            {
-                CastSpellCommand castspell = new CastSpellCommand();
-                castspell.Player = this;
-                castspell.Spell = Templates.Actions.Spells.Fireball();
-
-                Engine.CommandQueue.Add(castspell);
-
-                Engine.CurrentCommandInput = castspell;
-            }
-
-            if (keyboardState.IsKeyDown(Keys.S))
-            {
-                MoveCommand move = new MoveCommand();
-                move.Player = this;
-                move.MapPoint.X = Bounds.X;
-                move.MapPoint.Y = Bounds.Y + 64;
-                if (move.CanExecute(move.MapPoint))
+                // Move command
+                if (keyboardState.IsKeyDown(Keys.M))
                 {
-                    move.Execute();
-                }
-            }
+                    MoveCommand move = new MoveCommand(this);
 
-            if (keyboardState.IsKeyDown(Keys.W))
-            {
-                MoveCommand move = new MoveCommand();
-                move.Player = this;
-                move.MapPoint.X = Bounds.X;
-                move.MapPoint.Y = Bounds.Y - 64;
-                if (move.CanExecute(move.MapPoint))
+                    Engine.CommandQueue.Add(move);
+
+                    Engine.CurrentCommandInput = move;
+                }
+
+                if (keyboardState.IsKeyDown(Keys.C))
                 {
-                    move.Execute();
-                }
-            }
+                    CastSpellCommand castspell = new CastSpellCommand();
+                    castspell.Character = this;
+                    castspell.Spell = Templates.Actions.Spells.Spark();
 
-            if (keyboardState.IsKeyDown(Keys.A))
-            {
-                MoveCommand move = new MoveCommand();
-                move.Player = this;
-                move.MapPoint.X = Bounds.X - 64;
-                move.MapPoint.Y = Bounds.Y ;
-                if (move.CanExecute(move.MapPoint))
+                    Engine.CommandQueue.Add(castspell);
+
+                    Engine.CurrentCommandInput = castspell;
+                }
+
+                if (keyboardState.IsKeyDown(Keys.E))
                 {
-                    move.Execute();
+                    // End turn
+                    Engine.EndPlayerTurn();
                 }
-            }
 
-            if (keyboardState.IsKeyDown(Keys.D))
-            {
-
-                MoveCommand move = new MoveCommand();
-                move.Player = this;
-                move.MapPoint.X = Bounds.X + 64;
-                move.MapPoint.Y = Bounds.Y ;
-                if (move.CanExecute(move.MapPoint))
+                if (keyboardState.IsKeyDown(Keys.H))
                 {
-                    move.Execute();
+                    CastSpellCommand castspell = new CastSpellCommand();
+                    castspell.Character = this;
+                    castspell.Spell = Templates.Actions.Spells.Heal();
+
+                    Engine.CommandQueue.Add(castspell);
+
+                    Engine.CurrentCommandInput = castspell;
                 }
+
+                if (keyboardState.IsKeyDown(Keys.F))
+                {
+                    CastSpellCommand castspell = new CastSpellCommand();
+                    castspell.Character = this;
+                    castspell.Spell = Templates.Actions.Spells.Fireball();
+
+                    Engine.CommandQueue.Add(castspell);
+
+                    Engine.CurrentCommandInput = castspell;
+                }
+
+                if (keyboardState.IsKeyDown(Keys.S))
+                {
+                    MoveCommand move = new MoveCommand(this);
+                    move.MapPoint.X = Bounds.X;
+                    move.MapPoint.Y = Bounds.Y + 64;
+                    if (move.CanExecute(move.MapPoint))
+                    {
+                        move.Execute();
+                    }
+                }
+
+                if (keyboardState.IsKeyDown(Keys.W))
+                {
+                    MoveCommand move = new MoveCommand(this);
+                    move.MapPoint.X = Bounds.X;
+                    move.MapPoint.Y = Bounds.Y - 64;
+                    if (move.CanExecute(move.MapPoint))
+                    {
+                        move.Execute();
+                    }
+                }
+
+                if (keyboardState.IsKeyDown(Keys.A))
+                {
+                    MoveCommand move = new MoveCommand(this);
+                    move.MapPoint.X = Bounds.X - 64;
+                    move.MapPoint.Y = Bounds.Y;
+                    if (move.CanExecute(move.MapPoint))
+                    {
+                        move.Execute();
+                    }
+                }
+
+                if (keyboardState.IsKeyDown(Keys.D))
+                {
+
+                    MoveCommand move = new MoveCommand(this);
+                    move.MapPoint.X = Bounds.X + 64;
+                    move.MapPoint.Y = Bounds.Y;
+                    if (move.CanExecute(move.MapPoint))
+                    {
+                        move.Execute();
+                    }
+                }
+
             }
         }
 
@@ -257,19 +257,23 @@ namespace NaGaDeMo
             {
                 return;
             }
-
-            if (Engine.CurrentCommandInput is CastSpellCommand)
+            else
             {
-                CastSpellCommand castspell = (CastSpellCommand)Engine.CurrentCommandInput;
-                if (castspell.Spell.TargetType == TargetType.Single && castspell.CanExecute(castspell.Spell))
-                {
-                    castspell.Targets.Add(this);
-                    castspell.Execute();
 
-                    Engine.CommandList.Add(castspell);
-                    Engine.CommandQueue.Remove(castspell);
-                    Engine.CurrentCommandInput = null;
+                if (Engine.CurrentCommandInput is CastSpellCommand)
+                {
+                    CastSpellCommand castspell = (CastSpellCommand)Engine.CurrentCommandInput;
+                    if (castspell.Spell.TargetType == TargetType.Single && castspell.CanExecute(castspell.Spell))
+                    {
+                        castspell.Targets.Add(this);
+                        castspell.Execute();
+
+                        Engine.CommandList.Add(castspell);
+                        Engine.CommandQueue.Remove(castspell);
+                        Engine.CurrentCommandInput = null;
+                    }
                 }
+
             }
         }
     }

@@ -114,18 +114,18 @@ namespace NaGaDeMo
 
     public class CastSpellCommand : Command 
     {
-        public Player Player;
+        public Character Character;
         public Spell Spell;
         public List<XNAObject> Targets = new List<XNAObject>();
 
         public  bool CanExecute(Spell spell)
         {
-            if (Player.AP.Current == 0)
+            if (Character.AP.Current == 0)
             {
                 return false;
             }
 
-            if (Player.MP.Current < Spell.BaseManaCost)
+            if (Character.MP.Current < Spell.BaseManaCost)
             {
                 Debug.WriteLine("Not enough Mana!");
                 return false;
@@ -138,26 +138,37 @@ namespace NaGaDeMo
 
         public override void Execute()
         {
-            Player.MP.Current -= Spell.BaseManaCost;
-            Player.AP.Current -= 1;
-            Spell.Resolve(Player, Targets);
+            Character.MP.Current -= Spell.BaseManaCost;
+            Character.AP.Current -= 1;
+            Spell.Resolve(Character, Targets);
         }
     }
 
     public class MoveCommand : Command 
     {
-        public Player Player;
+        public Character Character;
         public Point MapPoint;
+
+        public MoveCommand(Character character)
+        {
+            Character = character;
+        }
+
+        public MoveCommand(Character character, Point mapPoint)
+        {
+            Character = character;
+            MapPoint = mapPoint;
+        }
 
         public override void Execute()
         {
-            Player.Move(MapPoint);
-            Player.AP.Current -= 1;
+            Character.Move(MapPoint);
+            Character.AP.Current -= 1;
         }
 
         public bool CanExecute(Point movePoint)
         {
-            if (Player.AP.Current == 0)
+            if (Character.AP.Current == 0)
             {
                 return false;
             }
@@ -233,7 +244,7 @@ namespace NaGaDeMo
         public static Battle CurrentBattle = new Battle();
 
         // Game state
-        private static State gameState = State.Upkeep;
+        private static State gameState = State.GameStart;
         public static State GameState
         {
             get
@@ -306,9 +317,13 @@ namespace NaGaDeMo
 
         public enum State
         {
-            Upkeep,
+            GameStart,
+            StartRound,
             PlayersTurn,
-            OpponentsTurn
+            OpponentsTurn,
+            EndRound,
+            GameEnd
+
         }
 
         public static void Draw(SpriteBatch spriteBatch)
@@ -342,13 +357,13 @@ namespace NaGaDeMo
 
         public static Color GetColorAtPoint(int x, int y)
         {
-            Color[] lightPixel = new Color[1];
+            Color[] Pixel = new Color[1];
 
             Rectangle sourceRectangle = new Rectangle(x, y, 1, 1); //rendertarget2D
 
-            CollisionBuffer.GetData(0, sourceRectangle, lightPixel, 0, 1);
+            CollisionBuffer.GetData(0, sourceRectangle, Pixel, 0, 1);
 
-            return lightPixel[0];
+            return Pixel[0];
         }
 
         public static void BufferCollisionMap(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
@@ -391,42 +406,50 @@ namespace NaGaDeMo
 
         private static void Engine_GameStart(object sender, EventArgs e)
         {
+            Debug.WriteLine("Game Starting...");
             RoundStart(null, e);
-
         }
 
         private static void Engine_RoundStart(object sender, EventArgs e)
         {
+            CurrentBattle.TurnNumber++;
+            Debug.WriteLine("Starting Round " + CurrentBattle.TurnNumber);
             GameState = State.PlayersTurn;
 
             // Transfer functionality to classes?
             Player.MP.Current += 3;
-            Player.AP.Current = Player.AP.Max;
+            
+            foreach (Character character in Engine.Characters)
+            {
+                character.TurnRefresh();
+            }
         }
 
         private static void Engine_PlayerTurnStart(object sender, EventArgs e)
         {
-
+            Debug.WriteLine("Player's turn has started");
         }
 
         private static void Engine_PlayerTurnEnd(object sender, EventArgs e)
         {
+            Debug.WriteLine("Player's turn has ended");
             GameState = State.OpponentsTurn;
-
         }
 
         private static void Engine_OpponentTurnStart(object sender, EventArgs e)
         {
-
+            Debug.WriteLine("Opponent's turn has started");
         }
 
         private static void Engine_OpponentTurnEnd(object sender, EventArgs e)
         {
+            Debug.WriteLine("Opponent's turn has ended");
             RoundEnd(null, e);
         }
 
         private static void Engine_RoundEnd(object sender, EventArgs e)
         {
+            Debug.WriteLine("Ending Round " + CurrentBattle.TurnNumber);
             RoundStart(null, e);
         }
 
@@ -439,15 +462,27 @@ namespace NaGaDeMo
 
         private static void Engine_GameStateChange(object sender, EventArgs e)
         {
-            if (gameState == State.OpponentsTurn)
+
+            switch (gameState)
             {
-                OpponentTurnStart(null, e);
+                case State.GameStart:
+                    break;
+                case State.StartRound:
+                    break;
+                case State.PlayersTurn:
+                    PlayerTurnStart(null, e);
+                    break;
+                case State.OpponentsTurn:
+                    OpponentTurnStart(null, e);
+                    break;
+                case State.EndRound:
+                    break;
+                case State.GameEnd:
+                    break;
+                default:
+                    break;
             }
 
-            if (gameState == State.PlayersTurn)
-            {
-                PlayerTurnStart(null, e);
-            }
         }
         
         #endregion
@@ -543,15 +578,10 @@ namespace NaGaDeMo
                 if (Engine.CurrentCommandInput is MoveCommand)
                 {
                     MoveCommand move = (MoveCommand)Engine.CurrentCommandInput;
-                    UI.DrawLine(spriteBatch, 2f, (move.CanExecute(new Point (UI.MousePoint.X/64*64+32, UI.MousePoint.Y/64*64+32))) ? Color.Green * 0.5f : Color.Red * 0.5f, new Vector2(move.Player.Bounds.X + 32, move.Player.Bounds.Y + 32), new Vector2(UI.MousePoint.X / 64 * 64 + 32, UI.MousePoint.Y / 64 * 64 + 32));
+                    UI.DrawLine(spriteBatch, 2f, (move.CanExecute(new Point (UI.MousePoint.X/64*64+32, UI.MousePoint.Y/64*64+32))) ? Color.Green * 0.5f : Color.Red * 0.5f, new Vector2(move.Character.Bounds.X + 32, move.Character.Bounds.Y + 32), new Vector2(UI.MousePoint.X / 64 * 64 + 32, UI.MousePoint.Y / 64 * 64 + 32));
                     spriteBatch.Draw(UI.Pixel, new Rectangle((UI.MousePoint.X / 64) * 64, (UI.MousePoint.Y / 64) * 64, 64, 64), (move.CanExecute(new Point(UI.MousePoint.X / 64 * 64 + 32, UI.MousePoint.Y / 64 * 64 + 32))) ? Color.Green * 0.5f : Color.Red * 0.5f);
                 }
             }
-        }
-
-        public void GetPixel()
-        {
-            
         }
 
         public Player Player;

@@ -24,6 +24,7 @@ namespace NaGaDeMo
                     {
                         if (Creature.InRange(Engine.CurrentBattle.Player, 1))
                         {
+                            Debug.WriteLine("Opponent: I will attack");
                             List<XNAObject> Target = new List<XNAObject>();
                             Target.Add(Engine.CurrentBattle.Player);
                             Creature.Actions[0].Resolve(Creature, Target);
@@ -31,7 +32,19 @@ namespace NaGaDeMo
 
                         Vector2 Direction = new Vector2(r.Next(-1, 2), r.Next(-1, 2));
 
-                        Creature.Move(Direction, 64);
+                        Point Location = new Point(Creature.Bounds.X + (int)(Direction.X * 64), Creature.Bounds.Y + (int)(Direction.Y * 64));
+
+                        MoveCommand move = new MoveCommand(Creature, Location);
+                        if (move.CanExecute(Location))
+                        {
+                            Debug.WriteLine("Opponent: I will move");
+                            move.Execute();
+                        }
+                        else
+                        {
+                            return;
+                        }
+
                     }
                 }
 
@@ -94,6 +107,7 @@ namespace NaGaDeMo
                 creature.TextureName = "Enemy";
                 creature.HP.Max = 10;
                 creature.HP.Current = 10;
+                creature.AP.Max = 2;
                 creature.X = X;
                 creature.Y = Y;
                 creature.Bounds.X = X * 64;
@@ -247,7 +261,7 @@ namespace NaGaDeMo
                 Battle battle = new Battle();
 
                 battle.GameMap = Maps.PathFinder();
-                
+
                 return battle;
             }
 

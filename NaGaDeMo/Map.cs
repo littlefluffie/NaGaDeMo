@@ -47,70 +47,71 @@ namespace NaGaDeMo
             {
                 return;
             }
-
-            if (Engine.CurrentCommandInput is MoveCommand)
+            else
             {
-                MoveCommand move = (MoveCommand)Engine.CurrentCommandInput;
-                move.MapPoint.X = Bounds.X;
-                move.MapPoint.Y = Bounds.Y;
 
-                if (move.CanExecute(move.MapPoint))
+                if (Engine.CurrentCommandInput is MoveCommand)
                 {
-                    move.Execute();
+                    MoveCommand move = (MoveCommand)Engine.CurrentCommandInput;
+                    move.MapPoint.X = Bounds.X;
+                    move.MapPoint.Y = Bounds.Y;
 
-                    Engine.CommandList.Add(move);
-                    Engine.CommandQueue.Remove(move);
-                    Engine.CurrentCommandInput = null;
-                }
-                else
-                {
-                    return;
-                }
-            }
+                    if (move.CanExecute(move.MapPoint))
+                    {
+                        move.Execute();
 
-            if (Engine.CurrentCommandInput is CastSpellCommand)
-            {
-                CastSpellCommand castSpell = (CastSpellCommand)Engine.CurrentCommandInput;
-
-                switch (castSpell.Spell.TargetType)
-                {
-                    case TargetType.None:
-                        break;
-
-                    case TargetType.Self:
-                        break;
-
-                    case TargetType.Single:
-                        break;
-
-                    case TargetType.Multiple:
-                        if (!castSpell.CanExecute(castSpell.Spell))
-                        {
-                            return;
-                        }
-
-                        foreach (Character character in Engine.Characters)
-                        {
-                            if (character.InRange(new Point(Bounds.X + 32, Bounds.Y + 32), castSpell.Spell.Range))
-                            {
-                                castSpell.Targets.Add(character);
-                            }
-                        }
-
-                        castSpell.Execute();
-                        Engine.CommandList.Add(castSpell);
-                        Engine.CommandQueue.Remove(castSpell);
+                        Engine.CommandList.Add(move);
+                        Engine.CommandQueue.Remove(move);
                         Engine.CurrentCommandInput = null;
-
-                        break;
-
-                    default:
-                        break;
+                    }
+                    else
+                    {
+                        return;
+                    }
                 }
 
+                if (Engine.CurrentCommandInput is CastSpellCommand)
+                {
+                    CastSpellCommand castSpell = (CastSpellCommand)Engine.CurrentCommandInput;
+
+                    switch (castSpell.Spell.TargetType)
+                    {
+                        case TargetType.None:
+                            break;
+
+                        case TargetType.Self:
+                            break;
+
+                        case TargetType.Single:
+                            break;
+
+                        case TargetType.Multiple:
+                            if (!castSpell.CanExecute(castSpell.Spell))
+                            {
+                                return;
+                            }
+
+                            foreach (Character character in Engine.Characters)
+                            {
+                                if (character.InRange(new Point(Bounds.X + 32, Bounds.Y + 32), castSpell.Spell.Range))
+                                {
+                                    castSpell.Targets.Add(character);
+                                }
+                            }
+
+                            castSpell.Execute();
+                            Engine.CommandList.Add(castSpell);
+                            Engine.CommandQueue.Remove(castSpell);
+                            Engine.CurrentCommandInput = null;
+
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
 
             }
-
         }
 
         #endregion
