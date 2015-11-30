@@ -107,7 +107,7 @@ namespace NaGaDeMo
             if (Engine.CurrentCommandInput is CastSpellCommand)
             {
                 CastSpellCommand castspell = (CastSpellCommand)Engine.CurrentCommandInput;
-                if (castspell.Spell.TargetType == TargetType.Self && castspell.CanExecute())
+                if (castspell.Spell.TargetType == TargetType.Self && castspell.CanExecute(castspell.Spell))
                 {
                     castspell.Targets.Add(this);
                     castspell.Execute();
@@ -185,7 +185,7 @@ namespace NaGaDeMo
                 move.Player = this;
                 move.MapPoint.X = Bounds.X;
                 move.MapPoint.Y = Bounds.Y + 64;
-                if (move.CanExecute())
+                if (move.CanExecute(move.MapPoint))
                 {
                     move.Execute();
                 }
@@ -197,7 +197,7 @@ namespace NaGaDeMo
                 move.Player = this;
                 move.MapPoint.X = Bounds.X;
                 move.MapPoint.Y = Bounds.Y - 64;
-                if (move.CanExecute())
+                if (move.CanExecute(move.MapPoint))
                 {
                     move.Execute();
                 }
@@ -209,7 +209,7 @@ namespace NaGaDeMo
                 move.Player = this;
                 move.MapPoint.X = Bounds.X - 64;
                 move.MapPoint.Y = Bounds.Y ;
-                if (move.CanExecute())
+                if (move.CanExecute(move.MapPoint))
                 {
                     move.Execute();
                 }
@@ -222,7 +222,7 @@ namespace NaGaDeMo
                 move.Player = this;
                 move.MapPoint.X = Bounds.X + 64;
                 move.MapPoint.Y = Bounds.Y ;
-                if (move.CanExecute())
+                if (move.CanExecute(move.MapPoint))
                 {
                     move.Execute();
                 }
@@ -261,7 +261,7 @@ namespace NaGaDeMo
             if (Engine.CurrentCommandInput is CastSpellCommand)
             {
                 CastSpellCommand castspell = (CastSpellCommand)Engine.CurrentCommandInput;
-                if (castspell.Spell.TargetType == TargetType.Single && castspell.CanExecute())
+                if (castspell.Spell.TargetType == TargetType.Single && castspell.CanExecute(castspell.Spell))
                 {
                     castspell.Targets.Add(this);
                     castspell.Execute();

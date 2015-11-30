@@ -54,7 +54,7 @@ namespace NaGaDeMo
                 move.MapPoint.X = Bounds.X;
                 move.MapPoint.Y = Bounds.Y;
 
-                if (move.CanExecute())
+                if (move.CanExecute(move.MapPoint))
                 {
                     move.Execute();
 
@@ -70,9 +70,9 @@ namespace NaGaDeMo
 
             if (Engine.CurrentCommandInput is CastSpellCommand)
             {
-                CastSpellCommand spell = (CastSpellCommand)Engine.CurrentCommandInput;
+                CastSpellCommand castSpell = (CastSpellCommand)Engine.CurrentCommandInput;
 
-                switch (spell.Spell.TargetType)
+                switch (castSpell.Spell.TargetType)
                 {
                     case TargetType.None:
                         break;
@@ -84,22 +84,22 @@ namespace NaGaDeMo
                         break;
 
                     case TargetType.Multiple:
-                        if (!spell.CanExecute())
+                        if (!castSpell.CanExecute(castSpell.Spell))
                         {
                             return;
                         }
 
                         foreach (Character character in Engine.Characters)
                         {
-                            if(character.InRange(new Point (Bounds.X+32,Bounds.Y+32), spell.Spell.Range))
+                            if (character.InRange(new Point(Bounds.X + 32, Bounds.Y + 32), castSpell.Spell.Range))
                             {
-                                spell.Targets.Add(character);
+                                castSpell.Targets.Add(character);
                             }
                         }
 
-                        spell.Execute();
-                        Engine.CommandList.Add(spell);
-                        Engine.CommandQueue.Remove(spell);
+                        castSpell.Execute();
+                        Engine.CommandList.Add(castSpell);
+                        Engine.CommandQueue.Remove(castSpell);
                         Engine.CurrentCommandInput = null;
 
                         break;
@@ -107,7 +107,7 @@ namespace NaGaDeMo
                     default:
                         break;
                 }
-                
+
 
             }
 

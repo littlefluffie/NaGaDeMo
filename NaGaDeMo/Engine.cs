@@ -10,7 +10,6 @@ using Microsoft.Xna.Framework.Content;
 
 namespace NaGaDeMo
 {
-
     /// <summary>
     /// The XNAObject abstract class is the base call for any object that is handled by XNA events/methods.
     /// 
@@ -107,19 +106,19 @@ namespace NaGaDeMo
         }
     }
 
-    public abstract class Command
+    public abstract class Command 
     {
         public abstract void Execute();
-        public abstract bool CanExecute();
+     // public abstract bool CanExecute();
     }
 
-    public class CastSpellCommand : Command
+    public class CastSpellCommand : Command 
     {
         public Player Player;
         public Spell Spell;
         public List<XNAObject> Targets = new List<XNAObject>();
 
-        public override bool CanExecute()
+        public  bool CanExecute(Spell spell)
         {
             if (Player.AP.Current == 0)
             {
@@ -145,7 +144,7 @@ namespace NaGaDeMo
         }
     }
 
-    public class MoveCommand : Command
+    public class MoveCommand : Command 
     {
         public Player Player;
         public Point MapPoint;
@@ -156,21 +155,31 @@ namespace NaGaDeMo
             Player.AP.Current -= 1;
         }
 
-        public override bool CanExecute()
+        public bool CanExecute(Point movePoint)
         {
             if (Player.AP.Current == 0)
             {
                 return false;
             }
 
-            if (Player.InRange(MapPoint, 3))
+            if (Engine.GetColorAtPoint(movePoint.X, movePoint.Y) == Color.White)
             {
+                // Collision detection
 
                 return true;
+                
+                //if (Player.InRange(MapPoint, 3))
+                //{
+                //    return true;
+                //}
+                //else
+                //{
+                //    Debug.WriteLine("Too far! ");
+                //    return false;
+                //}
             }
             else
             {
-                Debug.WriteLine("Too far! ");
                 return false;
             }
         }
@@ -260,14 +269,13 @@ namespace NaGaDeMo
             Player.Initialize();
 
             Player.TextureName = "Player";
-            Player.Bounds.X = 3 * 64;
-            Player.Bounds.Y = 10 * 64;
+            Player.Bounds.X =3*64;
+            Player.Bounds.Y = 3 * 64;
 
             // Setup Opponent
 
-
             // Setup Battle
-            CurrentBattle = Templates.Battles.PathFinding();
+            CurrentBattle = Templates.Battles.DefaultBattle();
             CurrentBattle.Player = Player;
 
             // Events registration
@@ -306,9 +314,8 @@ namespace NaGaDeMo
         public static void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(MapBuffer, UI.GameView, Color.White);
-
-
-            spriteBatch.Draw(UI.Pixel, new Rectangle (UI.CurrentMouseState.X,UI.CurrentMouseState.Y,5,5), Color.White);
+            
+            // spriteBatch.Draw(UI.Pixel, new Rectangle (UI.CurrentMouseState.X,UI.CurrentMouseState.Y,5,5), Color.White);
 
             // spriteBatch.Draw(CollisionBuffer, UI.GameView, Color.White * 0.5f);
         }
@@ -331,8 +338,17 @@ namespace NaGaDeMo
             spriteBatch.End();
 
             graphicsDevice.SetRenderTarget(null);
+        }
 
+        public static Color GetColorAtPoint(int x, int y)
+        {
+            Color[] lightPixel = new Color[1];
 
+            Rectangle sourceRectangle = new Rectangle(x, y, 1, 1); //rendertarget2D
+
+            CollisionBuffer.GetData(0, sourceRectangle, lightPixel, 0, 1);
+
+            return lightPixel[0];
         }
 
         public static void BufferCollisionMap(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch)
@@ -433,9 +449,7 @@ namespace NaGaDeMo
                 PlayerTurnStart(null, e);
             }
         }
-
-
-
+        
         #endregion
     }
 
@@ -471,11 +485,9 @@ namespace NaGaDeMo
         {
             public static void Draw(SpriteBatch spriteBatch)
             {
-
                 foreach (Creature creature in Engine.CurrentBattle.Creatures)
                 {
                     spriteBatch.DrawString(UI.UIFont, "HP: " + creature.HP.Current, new Vector2(creature.Bounds.X, creature.Bounds.Y), Color.Red);
-
                 }
 
                 spriteBatch.DrawString(UI.UIFont, "MP: " + Engine.CurrentBattle.Player.MP.Current + "/" + Engine.CurrentBattle.Player.MP.Max, new Vector2(Engine.CurrentBattle.Player.Bounds.X, Engine.CurrentBattle.Player.Bounds.Y), Color.Blue, 0f, new Vector2(0, 0), 0.5f, SpriteEffects.None, 1.0f);
@@ -531,8 +543,8 @@ namespace NaGaDeMo
                 if (Engine.CurrentCommandInput is MoveCommand)
                 {
                     MoveCommand move = (MoveCommand)Engine.CurrentCommandInput;
-                    UI.DrawLine(spriteBatch, 2f, (move.Player.InRange(new Point(UI.MousePoint.X / 64 * 64 + 32, UI.MousePoint.Y / 64 * 64 + 32), 3)) ? Color.Green * 0.5f : Color.Red * 0.5f, new Vector2(move.Player.Bounds.X + 32, move.Player.Bounds.Y + 32), new Vector2(UI.MousePoint.X / 64 * 64 + 32, UI.MousePoint.Y / 64 * 64 + 32));
-                    spriteBatch.Draw(UI.Pixel, new Rectangle((UI.MousePoint.X / 64) * 64, (UI.MousePoint.Y / 64) * 64, 64, 64), (move.Player.InRange(new Point(UI.MousePoint.X / 64 * 64 + 32, UI.MousePoint.Y / 64 * 64 + 32), 3)) ? Color.Green * 0.5f : Color.Red * 0.5f);
+                    UI.DrawLine(spriteBatch, 2f, (move.CanExecute(new Point (UI.MousePoint.X/64*64+32, UI.MousePoint.Y/64*64+32))) ? Color.Green * 0.5f : Color.Red * 0.5f, new Vector2(move.Player.Bounds.X + 32, move.Player.Bounds.Y + 32), new Vector2(UI.MousePoint.X / 64 * 64 + 32, UI.MousePoint.Y / 64 * 64 + 32));
+                    spriteBatch.Draw(UI.Pixel, new Rectangle((UI.MousePoint.X / 64) * 64, (UI.MousePoint.Y / 64) * 64, 64, 64), (move.CanExecute(new Point(UI.MousePoint.X / 64 * 64 + 32, UI.MousePoint.Y / 64 * 64 + 32))) ? Color.Green * 0.5f : Color.Red * 0.5f);
                 }
             }
         }
